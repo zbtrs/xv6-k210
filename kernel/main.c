@@ -21,6 +21,7 @@
 #include "include/fpioa.h"
 #include "include/dmac.h"
 #endif
+extern void _entry(void);
 
 static inline void inithartid(unsigned long hartid) {
   asm volatile("mv tp, %0" : : "r" (hartid & 0x1));
@@ -59,8 +60,9 @@ main(unsigned long hartid, unsigned long dtb_pa)
     printf("hart 0 init done\n");
     
     for(int i = 1; i < NCPU; i++) {
-      unsigned long mask = 1 << i;
-      sbi_send_ipi(&mask);
+      //unsigned long mask = 1 << i;
+      //sbi_send_ipi(mask, 1);
+      sbi_hart_start(i, (unsigned long)_entry, 0);
     }
     __sync_synchronize();
     started = 1;
