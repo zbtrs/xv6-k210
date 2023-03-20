@@ -129,16 +129,25 @@ ifndef CPUS
 CPUS := 2
 endif
 
-QEMUOPTS = -machine virt -kernel $T/kernel -m 8M -nographic
+QEMUOPTS = -machine virt -m 128M -nographic -kernel target/kernel -s -S
 
 # use multi-core 
 QEMUOPTS += -smp $(CPUS)
 
-QEMUOPTS += -bios $(RUSTSBI)
+QEMUOPTS += -bios default
 
 # import virtual disk image
 QEMUOPTS += -drive file=fs.img,if=none,format=raw,id=x0 
 QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
+
+gdb: build
+	@$(QEMU) $(QEMUOPTS) -S & gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
+
+
+qemu-run:
+	@make build platform=qemu
+	@make fs
+	@qemu-system-riscv64 -machine virt -bios default -m 128M -nographic -kernel target/kernel -smp 2 -drive file=fs.img,if=none,format=raw,id=x0 -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
 run: build
 ifeq ($(platform), k210)
