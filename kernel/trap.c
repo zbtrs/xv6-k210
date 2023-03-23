@@ -12,6 +12,7 @@
 #include "include/console.h"
 #include "include/timer.h"
 #include "include/disk.h"
+#include "include/uart.h"
 
 extern char trampoline[], uservec[], userret[];
 

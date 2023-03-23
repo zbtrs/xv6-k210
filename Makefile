@@ -15,6 +15,7 @@ endif
 
 OBJS += \
   $K/printf.o \
+  $K/uart.o \
   $K/kalloc.o \
   $K/intr.o \
   $K/spinlock.o \
