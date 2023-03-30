@@ -1,5 +1,5 @@
-#platform	:= k210
-platform	:= qemu
+platform	:= visionfive
+#platform	:= qemu
 mode := debug
 # mode := release
 K=kernel
@@ -7,8 +7,8 @@ U=xv6-user
 T=target
 
 OBJS =
-ifeq ($(platform), k210)
-OBJS += $K/entry_k210.o
+ifeq ($(platform), visionfive)
+OBJS += $K/entry_visionfive.o
 else
 OBJS += $K/entry_qemu.o
 endif
@@ -41,7 +41,12 @@ OBJS += \
   $K/plic.o \
   $K/console.o
 
-ifeq ($(platform), k210)
+ifeq ($(platform), qemu)
+OBJS += \
+  $K/virtio_disk.o \
+  #$K/uart.o \
+
+else
 OBJS += \
   $K/spi.o \
   $K/gpiohs.o \
@@ -50,11 +55,6 @@ OBJS += \
   $K/sdcard.o \
   $K/dmac.o \
   $K/sysctl.o \
-
-else
-OBJS += \
-  $K/virtio_disk.o \
-  #$K/uart.o \
 
 endif
 
@@ -79,12 +79,16 @@ endif
 
 ifeq ($(platform), qemu)
 CFLAGS += -D QEMU
+else ifeq ($(platform), k210)
+CFLAGS += -D k210
+else ifeq ($(platform), visionfive)
+CFLAGS += -D visionfive
 endif
 
 LDFLAGS = -z max-page-size=4096
 
-ifeq ($(platform), k210)
-linker = ./linker/k210.ld
+ifeq ($(platform), visionfive)
+linker = ./linker/visionfive.ld
 endif
 
 ifeq ($(platform), qemu)
@@ -99,15 +103,16 @@ $T/kernel: $(OBJS) $(linker) $U/initcode
 	@$(OBJDUMP) -t $T/kernel | sed '1,/SYMBOL TABLE/d; s/ .* / /; /^$$/d' > $T/kernel.sym
   
 build: $T/kernel userprogs
+	@$(OBJCOPY) $T/kernel --strip-all -O binary $(image)
 
 image = $T/kernel.bin
 k210 = $T/k210.bin
 k210-serialport := /dev/ttyUSB0
 
 QEMU = qemu-system-riscv64
-CPUS := 2
+CPUS := 4
 
-QEMUOPTS = -machine virt -m 128M -nographic -kernel target/kernel 
+QEMUOPTS = -machine virt -m 8G -nographic -kernel target/kernel 
 # use multi-core 
 QEMUOPTS += -smp $(CPUS)
 QEMUOPTS += -bios default

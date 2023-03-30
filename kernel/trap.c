@@ -214,7 +214,7 @@ int devintr(void) {
 
 		if (irq) { plic_complete(irq);}
 
-		#ifndef QEMU 
+		#ifdef k210 
 		w_sip(r_sip() & ~2);    // clear pending bit
 		sbi_set_mie();
 		#endif 

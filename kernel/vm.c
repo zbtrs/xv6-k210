@@ -28,7 +28,7 @@ kvminit()
   memset(kernel_pagetable, 0, PGSIZE);
 
   // uart registers
-  kvmmap(UART_V, UART, PGSIZE, PTE_R | PTE_W);
+  kvmmap(UART, UART, 0x10000, PTE_R | PTE_W);
   
   #ifdef QEMU
   // virtio mmio disk interface
@@ -41,7 +41,7 @@ kvminit()
   kvmmap(PLIC_V, PLIC, 0x4000, PTE_R | PTE_W);
   kvmmap(PLIC_V + 0x200000, PLIC + 0x200000, 0x4000, PTE_R | PTE_W);
 
-  #ifndef QEMU
+  #ifdef k210
   // GPIOHS
   kvmmap(GPIOHS_V, GPIOHS, 0x1000, PTE_R | PTE_W);
 
@@ -70,11 +70,17 @@ kvminit()
   kvmmap(SYSCTL_V, SYSCTL, 0x1000, PTE_R | PTE_W);
   
   #endif
+
+  #ifdef visionfive
+  kvmmap(GPIO, GPIO, 0x10000, PTE_R | PTE_W);
+  #endif
   
   // map rustsbi
   // kvmmap(RUSTSBI_BASE, RUSTSBI_BASE, KERNBASE - RUSTSBI_BASE, PTE_R | PTE_X);
   // map kernel text executable and read-only.
+  // kvmmap(0x40000000, 0x40000000, KERNBASE - 0x40000000, PTE_R | PTE_X | PTE_W);
   kvmmap(KERNBASE, KERNBASE, (uint64)etext - KERNBASE, PTE_R | PTE_X);
+  printf("etext:%p\n", etext);
   // map kernel data and the physical RAM we'll make use of.
   kvmmap((uint64)etext, (uint64)etext, PHYSTOP - (uint64)etext, PTE_R | PTE_W);
   // map the trampoline for trap entry/exit to
@@ -91,8 +97,20 @@ kvminit()
 void
 kvminithart()
 {
+  for(uint64 i = KERNBASE; i < (uint64)PHYSTOP; i += PGSIZE){
+    uint64 pa = kvmpa(i);
+    if(pa != i){
+      printf("map false\n");
+    }
+  }
+  
+  sfence_vma();
+  printf("successfully before satp\n");
+  reg_info();
   w_satp(MAKE_SATP(kernel_pagetable));
+  w_satp(0);
   // reg_info();
+  printf("successfully write satp\n");
   sfence_vma();
   #ifdef DEBUG
   printf("kvminithart\n");

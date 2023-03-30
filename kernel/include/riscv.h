@@ -330,7 +330,8 @@ sfence_vma()
 {
   // the zero, zero means flush all TLB entries.
   // asm volatile("sfence.vma zero, zero");
-  asm volatile("sfence.vma");
+  asm volatile("sfence.vma x0, x0");
+  // asm volatile("sfence.vma");
 }
 
 

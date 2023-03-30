@@ -20,6 +20,7 @@
 #include "include/sdcard.h"
 #include "include/fpioa.h"
 #include "include/dmac.h"
+extern void _start(void);
 #endif
 extern void _entry(void);
 
@@ -28,18 +29,26 @@ static inline void inithartid(unsigned long hartid) {
 }
 
 volatile static int started = 0;
+static int first = 0;
+extern void boot_stack(void);
+extern void boot_stack_top(void);
 
 void
 main(unsigned long hartid, unsigned long dtb_pa)
 {
   inithartid(hartid);
+  // sbi_console_putchar(hartid+48);
+  // sbi_console_putchar(' ');
+  // sbi_console_putchar(first+48);
   
-  if (hartid == 0) {
+  if (first == 0) {
+    first = 1;
     consoleinit();
     printfinit();   // init a lock for printf 
     print_logo();
     #ifdef DEBUG
     printf("hart %d enter main()...\n", hartid);
+    printf("%p, %p\n", boot_stack, boot_stack_top);
     #endif
     kinit();         // physical page allocator
     kvminit();       // create kernel page table
@@ -49,7 +58,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
     procinit();
     plicinit();
     plicinithart();
-    #ifndef QEMU
+    #ifdef k210
     fpioa_pin_init();
     dmac_init();
     #endif 
@@ -57,19 +66,24 @@ main(unsigned long hartid, unsigned long dtb_pa)
     binit();         // buffer cache
     fileinit();      // file table
     userinit();      // first user process
-    printf("hart 0 init done\n");
+    printf("hart %d init done\n", hartid);
     
-    for(int i = 1; i < NCPU; i++) {
-      //unsigned long mask = 1 << i;
+    for(int i = 0; i < NCPU; i++) {
+      if(i == hartid)
+        continue;
       //sbi_send_ipi(mask, 1);
+#ifdef QEMU
       sbi_hart_start(i, (unsigned long)_entry, 0);
+#else
+      sbi_hart_start(i, (unsigned long)_start, 0);
+#endif
     }
     __sync_synchronize();
     started = 1;
   }
   else
   {
-    // hart 1
+    // other hart 
     while (started == 0)
       ;
     __sync_synchronize();
