@@ -29,5 +29,7 @@
 #define SYS_getcwd      17
 #define SYS_rename      26
 #define SYS_getppid     173
+#define SYS_mkdirat     34
+#define SYS_nanosleep   101
 
 #endif

@@ -4,3 +4,4 @@
 #define O_APPEND  0x004
 #define O_CREATE  0x200
 #define O_TRUNC   0x400
+#define AT_FDCWD  -100

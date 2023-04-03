@@ -1,4 +1,4 @@
-
+#include "include/vm.h"
 #include "include/types.h"
 #include "include/riscv.h"
 #include "include/param.h"
@@ -64,6 +64,40 @@ sys_exit(void)
   exit(n);
   return 0;  // not reached
 }
+
+uint64 sys_nanosleep(void) {
+	uint64 addr_sec, addr_usec;
+
+	if (argaddr(0, &addr_sec) < 0) 
+		return -1;
+	if (argaddr(1, &addr_usec) < 0) 
+		return -1;
+
+	struct proc *p = myproc();
+	uint64 sec, usec;
+	if (copyin(p->pagetable, (char*)&sec, addr_sec, sizeof(sec)) < 0) 
+		return -1;
+	if (copyin(p->pagetable, (char*)&usec, addr_usec, sizeof(usec)) < 0) 
+		return -1;
+	int n = sec * 20 + usec / 50000000;
+
+	int mask = p->tmask;
+	if (mask) {
+		printf(") ...\n");
+	}
+	acquire(&p->lock);
+	uint64 tick0 = ticks;
+	while (ticks - tick0 < n / 10) {
+		if (p->killed) {
+			return -1;
+		}
+		sleep(&ticks, &p->lock);
+	}
+	release(&p->lock);
+
+	return 0;
+}
+
 
 uint64
 sys_getpid(void)

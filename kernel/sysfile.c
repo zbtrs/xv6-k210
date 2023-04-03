@@ -59,6 +59,12 @@ fdalloc(struct file *f)
 }
 
 uint64
+sys_mkdirat(void) 
+{
+  return -1;
+}
+
+uint64
 sys_dup(void)
 {
   struct file *f;
