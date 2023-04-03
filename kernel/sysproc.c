@@ -14,6 +14,12 @@
 extern int exec(char *path, char **argv);
 
 uint64
+sys_clone(void) 
+{
+  return fork();
+}
+
+uint64
 sys_exec(void)
 {
   char path[FAT32_MAX_PATH], *argv[MAXARG];

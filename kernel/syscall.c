@@ -119,6 +119,8 @@ extern uint64 sys_rename(void);
 extern uint64 sys_getppid(void);
 extern uint64 sys_mkdirat(void);
 extern uint64 sys_nanosleep(void);
+extern uint64 sys_clone(void);
+extern uint64 sys_pipe2(void);
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -150,6 +152,8 @@ static uint64 (*syscalls[])(void) = {
   [SYS_getppid]     sys_getppid,
   [SYS_mkdirat]     sys_mkdirat,
   [SYS_nanosleep]   sys_nanosleep,
+  [SYS_clone]       sys_clone,
+  [SYS_pipe2]       sys_pipe2,
 };
 
 static char *sysnames[] = {
@@ -181,7 +185,9 @@ static char *sysnames[] = {
   [SYS_rename]      "rename",
   [SYS_getppid]     "getppid",
   [SYS_mkdirat]     "mkdirat",
-  [SYS_nanosleep]   "nanosleep"
+  [SYS_nanosleep]   "nanosleep",
+  [SYS_clone]       "clone",
+  [SYS_pipe2]       "pipe2"
 };
 
 void

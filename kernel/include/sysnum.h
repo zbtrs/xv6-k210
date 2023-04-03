@@ -31,5 +31,7 @@
 #define SYS_getppid     173
 #define SYS_mkdirat     34
 #define SYS_nanosleep   101
+#define SYS_clone       220
+#define SYS_pipe2       59
 
 #endif
