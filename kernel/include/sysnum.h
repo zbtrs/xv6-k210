@@ -28,5 +28,6 @@
 #define SYS_readdir     24
 #define SYS_getcwd      17
 #define SYS_rename      26
+#define SYS_getppid     173
 
 #endif

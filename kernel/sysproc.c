@@ -72,6 +72,17 @@ sys_getpid(void)
 }
 
 uint64
+sys_getppid(void) 
+{
+  struct proc* p = myproc();
+  acquire(&p->lock);
+  uint64 ppid = p->parent->pid;
+  release(&p->lock);
+
+  return ppid;
+}
+
+uint64
 sys_fork(void)
 {
   return fork();
