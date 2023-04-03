@@ -796,3 +796,63 @@ procnum(void)
   return num;
 }
 
+struct proc *findchild(struct proc* p,int pid,struct proc** child) {
+  *child = NULL;
+  // iterator all process
+  for (struct proc* np = proc; np < &proc[NPROC]; np++) {
+    if ((pid == -1 || np->pid == pid) && np->parent == p) {
+      acquire(&np->lock);
+      *child = np;
+      if (np->state == ZOMBIE) {
+        return np;
+      }
+      release(&np->lock);
+    }
+  }
+  return NULL;
+}
+
+int wait4pid(int pid,uint64 addr,int options) 
+{
+  struct proc *p = myproc(), *child = NULL, *tchild = NULL;
+  int kidpid;
+  acquire(&p->lock);
+  while (1) {
+    kidpid = pid;
+    child = findchild(p,pid,&tchild);
+    if (NULL != child) {
+      kidpid = child->pid;
+      child->xstate <<= 8;
+      if (addr != 0 && copyout(p->pagetable,addr,(char *)&child->xstate,sizeof(child->xstate)) < 0) {
+        release(&child->lock);
+        release(&p->lock);
+        return -1;
+      }
+      freeproc(child);
+      release(&child->lock);
+      release(&p->lock);
+      
+      return kidpid;
+    }
+    /*
+    if (options & WNOHANG) {
+      release(&p->lock);
+      return 0;
+    }
+    */
+   if (!tchild) {
+      release(&p->lock);
+      return -1;
+   }
+   if (pid == -1) {
+    sleep(p,&p->lock);
+   } else {
+    sleep(tchild,&p->lock);
+    // pay attention!
+   }
+  }
+  release(&p->lock);
+  return 0;
+
+  // TODO: deal with options
+}

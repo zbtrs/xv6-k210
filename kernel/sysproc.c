@@ -16,7 +16,26 @@ extern int exec(char *path, char **argv);
 uint64
 sys_clone(void) 
 {
+  // TODO
   return fork();
+}
+
+uint64
+sys_wait4() 
+{
+  uint64 addr;
+  int pid,options;
+  if (argint(0,&pid) < 0) {
+    return -1;
+  }
+  if (argaddr(1,&addr) < 0) {
+    return -1;
+  }
+  if (argint(2,&options) < 0) {
+    return -1;
+  }
+
+  return wait4pid(pid,addr,options);
 }
 
 uint64

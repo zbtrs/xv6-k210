@@ -33,5 +33,6 @@
 #define SYS_nanosleep   101
 #define SYS_clone       220
 #define SYS_pipe2       59
+#define SYS_wait4       260
 
 #endif
