@@ -276,7 +276,7 @@ main(void)
   strcpy(envs[nenv].value, "/bin");
   nenv++;
 
-  getcwd(mycwd);
+  getcwd(mycwd, 128);
   // Read and run input commands.
   while(getcmd(buf, sizeof(buf)) >= 0){
     replace(buf);
@@ -285,7 +285,7 @@ main(void)
       buf[strlen(buf)-1] = 0;  // chop \n
       if(chdir(buf+3) < 0)
         fprintf(2, "cannot cd %s\n", buf+3);
-      getcwd(mycwd);
+      getcwd(mycwd, 128);
     }
     else{
       struct cmd *cmd = parsecmd(buf);

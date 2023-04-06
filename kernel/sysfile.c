@@ -400,7 +400,7 @@ sys_getcwd(void)
   if (copyout2(addr, s, strlen(s) + 1) < 0)
     return -1;
   
-  return 0;
+  return addr;
 
 }
 
