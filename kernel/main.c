@@ -37,9 +37,6 @@ void
 main(unsigned long hartid, unsigned long dtb_pa)
 {
   inithartid(hartid);
-  // sbi_console_putchar(hartid+48);
-  // sbi_console_putchar(' ');
-  // sbi_console_putchar(first+48);
   
   if (first == 0) {
     first = 1;
@@ -48,7 +45,6 @@ main(unsigned long hartid, unsigned long dtb_pa)
     print_logo();
     #ifdef DEBUG
     printf("hart %d enter main()...\n", hartid);
-    printf("%p, %p\n", boot_stack, boot_stack_top);
     #endif
     kinit();         // physical page allocator
     kvminit();       // create kernel page table

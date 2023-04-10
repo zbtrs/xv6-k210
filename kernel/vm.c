@@ -23,12 +23,13 @@ void
 kvminit()
 {
   kernel_pagetable = (pagetable_t) kalloc();
-  // printf("kernel_pagetable: %p\n", kernel_pagetable);
-
+#ifdef DEBUG
+  printf("kernel_pagetable: %p\n", kernel_pagetable);
+#endif
   memset(kernel_pagetable, 0, PGSIZE);
 
   // uart registers
-  kvmmap(UART, UART, 0x10000, PTE_R | PTE_W);
+  kvmmap(UART_V, UART, 0x1000, PTE_R | PTE_W);
   
   #ifdef QEMU
   // virtio mmio disk interface
@@ -72,20 +73,18 @@ kvminit()
   #endif
 
   #ifdef visionfive
-  kvmmap(GPIO, GPIO, 0x10000, PTE_R | PTE_W);
+  //kvmmap(GPIO, GPIO, 0x10000, PTE_R | PTE_W);
   #endif
   
   // map rustsbi
   // kvmmap(RUSTSBI_BASE, RUSTSBI_BASE, KERNBASE - RUSTSBI_BASE, PTE_R | PTE_X);
   // map kernel text executable and read-only.
-  // kvmmap(0x40000000, 0x40000000, KERNBASE - 0x40000000, PTE_R | PTE_X | PTE_W);
-  kvmmap(KERNBASE, KERNBASE, (uint64)etext - KERNBASE, PTE_R | PTE_X);
-  printf("etext:%p\n", etext);
+  kvmmap(KERNBASE, KERNBASE, (uint64)etext - KERNBASE, PTE_R | PTE_X | PTE_A | PTE_D);
   // map kernel data and the physical RAM we'll make use of.
-  kvmmap((uint64)etext, (uint64)etext, PHYSTOP - (uint64)etext, PTE_R | PTE_W);
+  kvmmap((uint64)etext, (uint64)etext, PHYSTOP - (uint64)etext, PTE_R | PTE_W | PTE_A | PTE_D);
   // map the trampoline for trap entry/exit to
   // the highest virtual address in the kernel.
-  kvmmap(TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X);
+  kvmmap(TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X | PTE_A | PTE_D);
 
   #ifdef DEBUG
   printf("kvminit\n");
@@ -97,22 +96,17 @@ kvminit()
 void
 kvminithart()
 {
-  for(uint64 i = KERNBASE; i < (uint64)PHYSTOP; i += PGSIZE){
-    uint64 pa = kvmpa(i);
-    if(pa != i){
-      printf("map false\n");
-    }
-  }
-  
-  sfence_vma();
+#ifdef DEBUG
   printf("successfully before satp\n");
-  reg_info();
-  w_satp(MAKE_SATP(kernel_pagetable));
-  w_satp(0);
+#endif
   // reg_info();
-  printf("successfully write satp\n");
   sfence_vma();
+  w_satp(MAKE_SATP(kernel_pagetable));
+  // sfence_vma();
+  // w_satp(0);
+  // reg_info();
   #ifdef DEBUG
+  printf("successfully write satp\n");
   printf("kvminithart\n");
   #endif
 }

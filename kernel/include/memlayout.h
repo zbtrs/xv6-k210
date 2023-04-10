@@ -45,7 +45,6 @@
 // qemu puts UART registers here in physical memory.
 #define UART                    0x10000000L
 #endif
-
 #define UART_V                  (UART + VIRT_OFFSET)
 
 #ifdef QEMU

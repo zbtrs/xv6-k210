@@ -110,7 +110,7 @@ k210 = $T/k210.bin
 k210-serialport := /dev/ttyUSB0
 
 QEMU = qemu-system-riscv64
-CPUS := 4
+CPUS := 1
 
 QEMUOPTS = -machine virt -m 8G -nographic -kernel target/kernel 
 # use multi-core 
