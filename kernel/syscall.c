@@ -123,6 +123,7 @@ extern uint64 sys_nanosleep(void);
 extern uint64 sys_clone(void);
 extern uint64 sys_pipe2(void);
 extern uint64 sys_wait4(void);
+extern uint64 sys_getdents64(void);
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -158,6 +159,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_clone]       sys_clone,
   [SYS_pipe2]       sys_pipe2,
   [SYS_wait4]       sys_wait4,
+  [SYS_getdents64]  sys_getdents64,
 };
 
 static char *sysnames[] = {
@@ -194,6 +196,7 @@ static char *sysnames[] = {
   [SYS_clone]       "clone",
   [SYS_pipe2]       "pipe2",
   [SYS_wait4]       "wait4",
+  [SYS_getdents64]  "getdents64",
 };
 
 void

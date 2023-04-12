@@ -69,4 +69,12 @@ struct dirent*  enameparent(char *path, char *name);
 int             eread(struct dirent *entry, int user_dst, uint64 dst, uint off, uint n);
 int             ewrite(struct dirent *entry, int user_src, uint64 src, uint off, uint n);
 
+struct dirent64 {
+    uint64          d_ino;
+    uint64          d_off;
+    unsigned short  d_reclen;
+    unsigned char   d_type;
+    char            d_name[FAT32_MAX_FILENAME + 1];
+};
+
 #endif

@@ -207,3 +207,61 @@ dirnext(struct file *f, uint64 addr)
 
   return 1;
 }
+
+// 和dirnext不同，要新建一个类linux的目录结构
+int
+get_next_dirent(struct file *f, uint64 addr, int n)
+{
+  struct proc *p = myproc();
+  if(f->readable == 0 || !(f->ep->attribute & ATTR_DIRECTORY))
+    return -1;
+  struct dirent de;
+  struct dirent64 lde;
+  int ret = 0,cnt = 0,copysize = 0;
+  elock(f->ep);  // 锁住目录
+  while (1) {
+    lde.d_off = f->off;
+    ret = enext(f->ep,&de,f->off,&cnt);
+    f->off += (cnt << 5);
+    // 如果当前的条目是一个空的
+    if (0 == ret) {
+      continue;
+    }
+    // 如果已经到了文件末尾了
+    if (-1 == ret) {
+      eunlock(f->ep);
+      return copysize;
+    }
+
+    memcpy(lde.d_name, de.filename, sizeof(de.filename));
+    lde.d_ino = 0;
+    lde.d_type = (de.attribute & ATTR_DIRECTORY) ? T_DIR : T_FILE;
+
+    // 计算大小，需要考虑内存对齐和可变长文件名
+    int size = sizeof(struct dirent64) - sizeof(lde.d_name) + strlen(lde.d_name) + 1;  // +1是因为字符串最后要保存一个0
+    size += (sizeof(uint64) - (size % sizeof(uint64))) % sizeof(uint64);
+    lde.d_reclen = size;
+
+    // 如果已经复制完n个字节了，就直接退出
+    if (lde.d_reclen > n) {
+      break;
+    }
+    
+    int cpsz = lde.d_reclen;
+
+    if (copyout(p->pagetable,addr,(char*)&lde,cpsz) < 0) {
+      eunlock(f->ep);
+      return -1;
+    }
+
+    addr += cpsz;
+    n -= cpsz;
+    copysize += cpsz;
+
+  }
+  eunlock(f->ep);
+
+  f->off += (cnt << 5);
+
+  return copysize;
+}

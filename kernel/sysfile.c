@@ -562,3 +562,16 @@ fail:
     eput(src);
   return -1;
 }
+
+uint64
+sys_getdents64(void)
+{
+  struct file *f;
+  int fd;
+  uint64 buf,len;
+  if (argfd(0,&fd,&f) < 0 || argaddr(1,&buf) < 0 || argaddr(2,&len) < 0) {
+    return -1;
+  }
+
+  return get_next_dirent(f,buf,len);
+}
