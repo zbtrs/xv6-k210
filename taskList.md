@@ -5,7 +5,7 @@
 * [X] test_clone
 * [ ] test_close
 * [X] test_dup
-* [ ] test_dup2
+* [X] test_dup2
 * [X] test_echo
 * [ ] test_execve
 * [X] test_exit
