@@ -93,6 +93,7 @@ argstr(int n, char *buf, int max)
 extern uint64 sys_chdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_dup(void);
+extern uint64 sys_dup3(void);
 extern uint64 sys_exec(void);
 extern uint64 sys_exit(void);
 extern uint64 sys_fork(void);
@@ -134,6 +135,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_fstat]       sys_fstat,
   [SYS_chdir]       sys_chdir,
   [SYS_dup]         sys_dup,
+  [SYS_dup3]         sys_dup3,
   [SYS_getpid]      sys_getpid,
   [SYS_sbrk]        sys_sbrk,
   [SYS_sleep]       sys_sleep,
@@ -169,6 +171,7 @@ static char *sysnames[] = {
   [SYS_fstat]       "fstat",
   [SYS_chdir]       "chdir",
   [SYS_dup]         "dup",
+  [SYS_dup3]         "dup3",
   [SYS_getpid]      "getpid",
   [SYS_sbrk]        "sbrk",
   [SYS_sleep]       "sleep",

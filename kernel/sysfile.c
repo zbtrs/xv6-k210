@@ -58,6 +58,21 @@ fdalloc(struct file *f)
   return -1;
 }
 
+// Comedymaker added
+// Allocate a specifed file descriptor for the given file
+static int
+fdalloc3(struct file *f, int new)
+{
+  struct proc *p = myproc();
+  if (new < NOFILE && p->ofile[new] == 0)
+  {
+    /* code */
+    p->ofile[new] = f;
+    return new;
+  }
+  return -1;
+}
+
 uint64
 sys_mkdirat(void) 
 {
@@ -69,10 +84,24 @@ sys_dup(void)
 {
   struct file *f;
   int fd;
-
+  printf("arrive here!\n");
   if(argfd(0, 0, &f) < 0)
     return -1;
   if((fd=fdalloc(f)) < 0)
+    return -1;
+  filedup(f);
+  return fd;
+}
+
+uint64
+sys_dup3(void)
+{
+  struct file *f;
+  int new;
+  int fd;
+  if(argfd(0, 0, &f) < 0 || argint(1, &new) < 0)
+    return -1;
+  if((fd=fdalloc3(f, new)) < 0)
     return -1;
   filedup(f);
   return fd;

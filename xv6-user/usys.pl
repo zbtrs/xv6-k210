@@ -29,6 +29,7 @@ entry("fstat");
 entry("mkdir");
 entry("chdir");
 entry("dup");
+entry("dup3");
 entry("getpid");
 entry("sbrk");
 entry("sleep");
