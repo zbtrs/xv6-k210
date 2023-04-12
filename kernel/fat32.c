@@ -9,6 +9,7 @@
 #include "include/fat32.h"
 #include "include/string.h"
 #include "include/printf.h"
+#include "include/fcntl.h"
 
 /* fields that start with "_" are something we don't use */
 
@@ -932,4 +933,72 @@ struct dirent *ename(char *path)
 struct dirent *enameparent(char *path, char *name)
 {
     return lookup_path(path, 1, name);
+}
+
+
+// 尝试将parent_name中的最后一个/以及后面的字符去掉，结果放到path中。
+static void get_parent_name(char *path, char *parent_name, char *name)
+{
+    int len = strlen(path);
+    strncpy(parent_name,path,len + 1);
+    int cur = len - 1;
+    if (parent_name[cur] == '/')
+    {
+        cur--;
+    }
+    
+    for (;cur >= 0; cur--) {
+        if (parent_name[cur] == '/') {
+            parent_name[cur] = '0';
+            break;
+        }
+    }
+
+    int parent_name_len = strlen(parent_name);
+    strncpy(name,path + parent_name_len + 1,len - parent_name_len + 1);
+}
+
+struct dirent* create(struct dirent *env, char *path, short type, int mode) 
+{
+    struct dirent *ep, *dp;
+    char pname[FAT32_MAX_FILENAME + 1],name[FAT32_MAX_FILENAME + 1];
+    if (type == T_DIR) {
+        mode = ATTR_DIRECTORY;
+    } else if (mode & O_RDONLY) {
+        mode = ATTR_READ_ONLY;
+    } else {
+        mode = 0;
+    }
+
+    if(NULL == (dp = enameparent(path,name))) {
+        // 如果父亲目录没有创建，则递归创建
+        get_parent_name(path,pname,name);
+        dp = create(env,pname,T_DIR,O_RDWR);
+        if (NULL == dp) {
+            return NULL;
+        }
+    } else {
+        elock(dp);
+    }
+    //创建当前文件
+    if (NULL == (ep = ealloc(dp,name,mode))) {
+        // 如果创建dirent失败，不仅要解锁，还有减少引用计数
+        eunlock(dp);
+        eput(dp);
+        return NULL;
+    }
+    if ((type == T_DIR && !(ep->attribute & ATTR_DIRECTORY)) ||
+        (type == T_FILE && (ep->attribute & ATTR_DIRECTORY))) {
+        eunlock(dp);
+        eput(ep);
+        eput(dp);
+        return NULL;
+    }
+
+    eunlock(dp);
+    eput(dp);
+    elock(ep);
+    // 返回上锁的dirent，因为之前执行了ealloc，所以引用计数不为0
+    
+    return ep;
 }

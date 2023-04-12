@@ -575,3 +575,25 @@ sys_getdents64(void)
 
   return get_next_dirent(f,buf,len);
 }
+
+/*
+fd：文件所在目录的文件描述符。
+
+filename：要打开或创建的文件名。如为绝对路径，则忽略fd。如为相对路径，且fd是AT_FDCWD，则filename是相对于当前工作目录来说的。如为相对路径，且fd是一个文件描述符，则filename是相对于fd所指向的目录来说的。
+
+flags：必须包含如下访问模式的其中一种：O_RDONLY，O_WRONLY，O_RDWR。还可以包含文件创建标志和文件状态标志。
+
+mode：文件的所有权描述。详见man 7 inode 。
+
+返回值：成功执行，返回新的文件描述符。失败，返回-1。
+
+int fd, const char *filename, int flags, mode_t mode;
+int ret = syscall(SYS_openat, fd, filename, flags, mode);
+*/
+uint64
+sys_openat()
+{
+  // TODO
+
+  return 0;
+}

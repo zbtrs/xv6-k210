@@ -218,7 +218,7 @@ get_next_dirent(struct file *f, uint64 addr, int n)
   struct dirent de;
   struct dirent64 lde;
   int ret = 0,cnt = 0,copysize = 0;
-  elock(f->ep);  // 锁住目录
+  elock(f->ep);  // 锁住条目
   while (1) {
     lde.d_off = f->off;
     ret = enext(f->ep,&de,f->off,&cnt);

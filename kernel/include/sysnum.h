@@ -36,5 +36,6 @@
 #define SYS_pipe2       59
 #define SYS_wait4       260
 #define SYS_getdents64  61
+#define SYS_openat      56
 
 #endif
