@@ -887,6 +887,46 @@ static char *skipelem(char *path, char *name)
 }
 
 // FAT32 version of namex in xv6's original file system.
+static struct dirent *new_lookup_path(struct dirent *env, char *path, int parent, char *name)
+{
+    struct dirent *entry, *next;
+    if (*path == '/') {
+        entry = edup(&root);
+    } else if(env) {
+        entry = edup(env);
+    } else if (*path != '\0') {
+        entry = edup(myproc()->cwd);
+    } else {
+        return NULL;
+    }
+    while ((path = skipelem(path, name)) != 0) {
+        elock(entry);
+        if (!(entry->attribute & ATTR_DIRECTORY)) {
+            eunlock(entry);
+            eput(entry);
+            return NULL;
+        }
+        if (parent && *path == '\0') {
+            eunlock(entry);
+            return entry;
+        }
+        if ((next = dirlookup(entry, name, 0)) == 0) {
+            eunlock(entry);
+            eput(entry);
+            return NULL;
+        }
+        eunlock(entry);
+        eput(entry);
+        entry = next;
+    }
+    if (parent) {
+        eput(entry);
+        return NULL;
+    }
+    return entry;
+}
+
+// FAT32 version of namex in xv6's original file system.
 static struct dirent *lookup_path(char *path, int parent, char *name)
 {
     struct dirent *entry, *next;
@@ -924,6 +964,12 @@ static struct dirent *lookup_path(char *path, int parent, char *name)
     return entry;
 }
 
+struct dirent *new_ename(struct dirent *env,char *path) 
+{
+    char name[FAT32_MAX_FILENAME + 1];
+    return new_lookup_path(env,path, 0, name);
+}
+
 struct dirent *ename(char *path)
 {
     char name[FAT32_MAX_FILENAME + 1];
@@ -935,6 +981,10 @@ struct dirent *enameparent(char *path, char *name)
     return lookup_path(path, 1, name);
 }
 
+struct dirent *new_enameparent(struct dirent *env, char *path, char *name)
+{
+    return new_lookup_path(env,path,1,name);
+}
 
 // 尝试将parent_name中的最后一个/以及后面的字符去掉，结果放到path中。
 static void get_parent_name(char *path, char *parent_name, char *name)
@@ -958,7 +1008,7 @@ static void get_parent_name(char *path, char *parent_name, char *name)
     strncpy(name,path + parent_name_len + 1,len - parent_name_len + 1);
 }
 
-struct dirent* create(struct dirent *env, char *path, short type, int mode) 
+struct dirent* new_create(struct dirent *env, char *path, short type, int mode) 
 {
     struct dirent *ep, *dp;
     char pname[FAT32_MAX_FILENAME + 1],name[FAT32_MAX_FILENAME + 1];
@@ -970,10 +1020,10 @@ struct dirent* create(struct dirent *env, char *path, short type, int mode)
         mode = 0;
     }
 
-    if(NULL == (dp = enameparent(path,name))) {
+    if(NULL == (dp = new_enameparent(env,path,name))) {
         // 如果父亲目录没有创建，则递归创建
         get_parent_name(path,pname,name);
-        dp = create(env,pname,T_DIR,O_RDWR);
+        dp = new_create(env,pname,T_DIR,O_RDWR);
         if (NULL == dp) {
             return NULL;
         }

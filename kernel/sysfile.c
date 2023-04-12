@@ -593,7 +593,54 @@ int ret = syscall(SYS_openat, fd, filename, flags, mode);
 uint64
 sys_openat()
 {
-  // TODO
+  char path[FAT32_MAX_FILENAME];
+  int dirfd,flags,mode,fd;
+  struct file *f,*dirf;
+  struct dirent *dp = NULL,*ep;
+  if (argfd(0,&dirfd,&dirf) < 0 || argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
+    return -1;
+  } 
+  if (mode & O_RDWR) 
+    flags |= O_RDWR;
 
-  return 0;
+  if (NULL == (ep = new_ename(dp,path))) {
+    // 如果文件不存在
+    if (flags & O_CREATE) {
+      ep = new_create(dp,path,T_FILE,flags);
+      if (NULL == ep) {
+        // 创建不了dirent
+        return -1;
+      }
+    }
+    if (!ep) {
+      return -1;
+    }
+  } else {
+    elock(ep);
+  }
+  // 如果ename成功创建了ep,那么返回的dirent是已经上锁的
+  // TODO:检查设备
+  if(NULL == (f = filealloc()) || (fd = fdalloc(f)) < 0) {
+    // 文件描述符或者文件创建失败
+    if (f) {
+      fileclose(f);
+    }
+    eunlock(ep);
+    eput(ep);
+    return -1;
+  }
+  if (!(ep->attribute & ATTR_DIRECTORY) && (flags & O_TRUNC)) {
+    etrunc(ep);
+  }
+  f->type = FD_ENTRY;
+  f->off = (flags & O_APPEND) ? ep->file_size : 0;
+  f->ep = ep;
+  f->readable = !(flags & O_WRONLY);
+  f->writable = (flags & O_WRONLY) || (flags & O_RDWR);
+  eunlock(ep);
+  if (dp) {
+    elock(dp);
+  }
+  
+  return fd;
 }

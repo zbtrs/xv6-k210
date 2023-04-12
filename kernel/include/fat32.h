@@ -66,9 +66,12 @@ void            eunlock(struct dirent *entry);
 int             enext(struct dirent *dp, struct dirent *ep, uint off, int *count);
 struct dirent*  ename(char *path);
 struct dirent*  enameparent(char *path, char *name);
+struct dirent*  new_enameparent(struct dirent *env, char *path, char *name);
+struct dirent*  new_ename(struct dirent *env,char *path);
+
 int             eread(struct dirent *entry, int user_dst, uint64 dst, uint off, uint n);
 int             ewrite(struct dirent *entry, int user_src, uint64 src, uint off, uint n);
-struct dirent*  create(struct dirent*, char *,short,int);
+struct dirent*  new_create(struct dirent*, char *,short,int);
 
 
 // 用于sys_dirent64的返回结果，需要先得到dirent，然后再把信息放到这个结构体上面返回。
