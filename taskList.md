@@ -1,6 +1,6 @@
 ## 测试程序列表
 
-* [ ] test_brk
+* [X] test_brk
 * [ ] test_chdir
 * [X] test_clone
 * [ ] test_close
