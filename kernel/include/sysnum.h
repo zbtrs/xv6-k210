@@ -14,7 +14,8 @@
 #define SYS_dup         23
 #define SYS_dup3        24
 #define SYS_getpid      172
-#define SYS_sbrk        12
+#define SYS_sbrk        12 //from 12 to 214
+#define SYS_brk         214
 #define SYS_sleep       13
 #define SYS_uptime      14
 #define SYS_open        15

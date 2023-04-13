@@ -171,6 +171,28 @@ sys_sbrk(void)
 }
 
 uint64
+sys_brk(void)
+{
+  int addr;
+  int n;
+
+  if(argint(0, &n) < 0)
+    return -1;
+  addr = myproc()->sz;
+  if (n == 0)
+  {
+    return addr;
+  }
+  if (n >= addr)
+  {
+    if(growproc(n - addr) < 0)
+      return -1;
+    else return 0;
+  }
+  return -1;
+}
+
+uint64
 sys_sleep(void)
 {
   int n;
