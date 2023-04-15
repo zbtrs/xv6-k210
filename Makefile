@@ -115,8 +115,11 @@ QEMUOPTS += -bios default
 QEMUOPTS += -drive file=fs.img,if=none,format=raw,id=x0 
 QEMUOPTS += -device virtio-blk-device,drive=x0,bus=virtio-mmio-bus.0
 
-gdb: build
-	@$(QEMU) $(QEMUOPTS) -s -S & gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
+gdb-server: build
+	@$(QEMU) $(QEMUOPTS) -s -S
+
+gdb-client:
+	gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
 
 qemu-run:
 	@make build platform=qemu

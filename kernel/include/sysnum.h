@@ -23,7 +23,7 @@
 #define SYS_remove      25
 #define SYS_trace       18
 #define SYS_sysinfo     19
-#define SYS_mkdir       20
+#define SYS_mkdir       1030
 #define SYS_close       57
 #define SYS_test_proc   22
 #define SYS_dev         10

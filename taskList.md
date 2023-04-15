@@ -1,7 +1,7 @@
 ## 测试程序列表
 
 * [X] test_brk
-* [ ] test_chdir
+* [X] test_chdir
 * [X] test_clone
 * [ ] test_close
 * [X] test_dup

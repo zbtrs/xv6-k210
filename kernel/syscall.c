@@ -211,6 +211,9 @@ syscall(void)
   struct proc *p = myproc();
 
   num = p->trapframe->a7;
+  if(num == SYS_mkdirat){
+    printf("syscall mkdirat!\n");
+  }
   if(num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     p->trapframe->a0 = syscalls[num]();
         // trace

@@ -72,11 +72,22 @@ fdalloc3(struct file *f, int new)
   }
   return -1;
 }
-
+static struct dirent* create(char *path, short type, int mode);
 uint64
 sys_mkdirat(void) 
 {
-  return -1;
+  //目前测试中的mkdir都是调用了mkdirat，并且测试中并没有测试mkdirat
+  //所以我们目前只考虑path，不考虑mkdirat的其他参数
+  //下面的写法目前是和mkdir一样的，但是注意，我们的参数path是第1个，而mkdir的path是第0个
+  char path[FAT32_MAX_PATH];
+  struct dirent *ep;
+
+  if(argstr(1, path, FAT32_MAX_PATH) < 0 || (ep = create(path, T_DIR, 0)) == 0){
+    return -1;
+  }
+  eunlock(ep);
+  eput(ep);
+  return 0;
 }
 
 uint64
