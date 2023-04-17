@@ -1,7 +1,7 @@
 ## 测试程序列表
 
 * [X] test_brk
-* [X] test_chdir
+* [ ] test_chdir
 * [X] test_clone
 * [X] test_close
 * [X] test_dup
@@ -15,12 +15,12 @@
 * [ ] test_getdents
 * [X] test_getpid
 * [X] test_getppid
-* [ ] test_gettimeofday
+* [X] test_gettimeofday
 * [X] test_mkdir_
 * [ ] test_mmap
 * [ ] test_mount
 * [ ] test_munmap
-* [x] test_open
+* [ ] test_open
 * [x] test_openat
 * [X] test_pipe
 * [ ] test_read
