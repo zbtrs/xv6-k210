@@ -12,7 +12,7 @@
 * [X] test_fork
 * [ ] test_fstat
 * [X] test_getcwd
-* [ ] test_getdents
+* [X] test_getdents
 * [X] test_getpid
 * [X] test_getppid
 * [X] test_gettimeofday
