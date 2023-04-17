@@ -291,3 +291,17 @@ sys_trace(void)
   myproc()->tmask = mask;
   return 0;
 }
+
+uint64
+sys_gettimeofday(void)
+{
+  uint64 tt;
+  if (argaddr(0, &tt) < 0) 
+		return -1;
+  uint64 t = r_time();
+  TimeSpec ts;
+  ts.second = t / 1000000;
+  ts.microSecond = t % 1000000;
+  // printf("second: %d, microSecond: %d\n", ts.second, ts.microSecond);
+  return copyout2(tt, (char*) &ts, sizeof(TimeSpec));
+}
