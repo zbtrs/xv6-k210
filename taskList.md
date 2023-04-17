@@ -3,7 +3,7 @@
 * [X] test_brk
 * [X] test_chdir
 * [X] test_clone
-* [ ] test_close
+* [X] test_close
 * [X] test_dup
 * [X] test_dup2
 * [X] test_echo
@@ -16,12 +16,12 @@
 * [X] test_getpid
 * [X] test_getppid
 * [ ] test_gettimeofday
-* [ ] test_mkdir_
+* [X] test_mkdir_
 * [ ] test_mmap
 * [ ] test_mount
 * [ ] test_munmap
-* [ ] test_open
-* [ ] test_openat
+* [x] test_open
+* [x] test_openat
 * [X] test_pipe
 * [ ] test_read
 * [ ] test_sleep
