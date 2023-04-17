@@ -772,8 +772,10 @@ int enext(struct dirent *dp, struct dirent *ep, uint off, int *count)
 {
     if (!(dp->attribute & ATTR_DIRECTORY))
         panic("enext not dir");
+    /*
     if (ep->valid)
         panic("enext ep valid");
+        */
     if (off % 32)
         panic("enext not align");
     if (dp->valid != 1) { return -1; }
