@@ -86,7 +86,7 @@ uint64
 sys_execve(void)
 {
   char path[FAT32_MAX_PATH], *argv[MAXARG];
-  char *env[MAXARG];
+  // char *env[MAXARG];
   int i;
   uint64 uargv, uarg, uenv;
 
