@@ -7,7 +7,7 @@
 * [X] test_dup
 * [X] test_dup2
 * [X] test_echo
-* [ ] test_execve
+* [X] test_execve
 * [X] test_exit
 * [X] test_fork
 * [ ] test_fstat

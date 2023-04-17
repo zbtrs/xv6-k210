@@ -9,6 +9,7 @@
 #define SYS_read        63
 #define SYS_kill         6
 #define SYS_exec         7
+#define SYS_execve     221
 #define SYS_fstat       80
 #define SYS_chdir       49
 #define SYS_dup         23
