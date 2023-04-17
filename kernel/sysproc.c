@@ -80,6 +80,51 @@ sys_exec(void)
   return -1;
 }
 
+//标准syscall参数相比于exec多了一个环境变量数组指针，因此新建了一个execve系统调用
+//该函数相比于exec只是接收了环境变量数组参数，但还没有进行任何处理
+uint64
+sys_execve(void)
+{
+  char path[FAT32_MAX_PATH], *argv[MAXARG];
+  char *env[MAXARG];
+  int i;
+  uint64 uargv, uarg, uenv;
+
+  if(argstr(0, path, FAT32_MAX_PATH) < 0 || argaddr(1, &uargv) < 0 || argaddr(2, &uenv)){
+    return -1;
+  }
+  memset(argv, 0, sizeof(argv));
+  for(i=0;; i++){
+    if(i >= NELEM(argv)){
+      goto bad;
+    }
+    if(fetchaddr(uargv+sizeof(uint64)*i, (uint64*)&uarg) < 0){
+      goto bad;
+    }
+    if(uarg == 0){
+      argv[i] = 0;
+      break;
+    }
+    argv[i] = kalloc();
+    if(argv[i] == 0)
+      goto bad;
+    if(fetchstr(uarg, argv[i], PGSIZE) < 0)
+      goto bad;
+  }
+
+  int ret = exec(path, argv);
+
+  for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
+    kfree(argv[i]);
+
+  return ret;
+
+ bad:
+  for(i = 0; i < NELEM(argv) && argv[i] != 0; i++)
+    kfree(argv[i]);
+  return -1;
+}
+
 uint64
 sys_exit(void)
 {
