@@ -608,11 +608,21 @@ sys_openat()
   int dirfd,flags,mode,fd;
   struct file *f,*dirf;
   struct dirent *dp = NULL,*ep;
-  if (argfd(0,&dirfd,&dirf) < 0 || argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
+  argfd(0,&dirfd,&dirf);
+  if (argstr(1,path,FAT32_MAX_PATH) < 0 || argint(2,&flags) < 0 || argint(3,&mode) < 0) {
     return -1;
   } 
   if (mode & O_RDWR) 
     flags |= O_RDWR;
+
+  if (dirf && FD_ENTRY == dirf->type) {
+    dp = dirf->ep;
+    elock(dp);
+    if (!(dp->attribute & ATTR_DIRECTORY)) {
+      eunlock(dp);
+      dp = NULL;
+    }
+  }
 
   if (NULL == (ep = new_ename(dp,path))) {
     // 如果文件不存在
