@@ -20,10 +20,10 @@
 * [ ] test_mmap
 * [ ] test_mount
 * [ ] test_munmap
-* [ ] test_open
+* [X] test_open
 * [x] test_openat
 * [X] test_pipe
-* [ ] test_read
+* [X] test_read
 * [ ] test_sleep
 * [ ] test_times
 * [ ] test_umount
