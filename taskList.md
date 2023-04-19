@@ -10,7 +10,7 @@
 * [X] test_execve
 * [X] test_exit
 * [X] test_fork
-* [ ] test_fstat
+* [X] test_fstat
 * [X] test_getcwd
 * [X] test_getdents
 * [X] test_getpid
