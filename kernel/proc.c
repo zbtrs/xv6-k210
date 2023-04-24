@@ -856,3 +856,11 @@ int wait4pid(int pid,uint64 addr,int options)
 
   // TODO: deal with options
 }
+
+
+uint64
+sys_yield()
+{
+  yield();
+  return 0;
+}
