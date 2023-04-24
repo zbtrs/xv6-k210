@@ -459,6 +459,10 @@ exit(int status)
 
   // Parent might be sleeping in wait().
   wakeup1(original_parent);
+  // Parent might be sleeping in wait4pid().
+  if(original_parent->chan == p && original_parent->state == SLEEPING){
+    original_parent->state = RUNNABLE;
+  }
 
   p->xstate = status;
   p->state = ZOMBIE;
