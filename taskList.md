@@ -24,12 +24,12 @@
 * [x] test_openat
 * [X] test_pipe
 * [X] test_read
-* [ ] test_sleep
+* [X] test_sleep
 * [ ] test_times
 * [ ] test_umount
 * [ ] test_uname
 * [ ] test_unlink
 * [X] test_wait
-* [ ] test_waitpid
+* [X] test_waitpid
 * [X] test_write
-* [ ] test_yield
+* [X] test_yield
