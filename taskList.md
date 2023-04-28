@@ -27,7 +27,7 @@
 * [X] test_sleep
 * [ ] test_times
 * [ ] test_umount
-* [ ] test_uname
+* [X] test_uname
 * [ ] test_unlink
 * [X] test_wait
 * [X] test_waitpid

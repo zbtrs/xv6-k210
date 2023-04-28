@@ -41,4 +41,5 @@
 #define SYS_openat      56
 #define SYS_gettimeofday 169
 #define SYS_sched_yield 124
+#define SYS_uname       160
 #endif
