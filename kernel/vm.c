@@ -8,6 +8,8 @@
 #include "include/proc.h"
 #include "include/printf.h"
 #include "include/string.h"
+#include "include/uart.h"
+#include "include/qspi.h"
 
 /*
  * the kernel's page table.
@@ -85,6 +87,12 @@ kvminit()
   // map the trampoline for trap entry/exit to
   // the highest virtual address in the kernel.
   kvmmap(TRAMPOLINE, (uint64)trampoline, PGSIZE, PTE_R | PTE_X | PTE_A | PTE_D);
+
+  //SPI
+  kvmmap(SPI_CTRL_ADDR, SPI_CTRL_ADDR, 0x1000, PTE_R | PTE_W);
+
+  //UART
+  kvmmap(UART_CTRL_ADDR, UART_CTRL_ADDR, 0x1000, PTE_R | PTE_W);
 
   #ifdef DEBUG
   printf("kvminit\n");

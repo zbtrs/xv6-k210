@@ -16,6 +16,7 @@
 #include "include/vm.h"
 #include "include/disk.h"
 #include "include/buf.h"
+#include "include/sd.h"
 #ifndef QEMU
 #include "include/sdcard.h"
 #include "include/fpioa.h"
@@ -58,7 +59,8 @@ main(unsigned long hartid, unsigned long dtb_pa)
     fpioa_pin_init();
     dmac_init();
     #endif 
-    disk_init();
+    // disk_init();
+    sdInit();
     binit();         // buffer cache
     fileinit();      // file table
     userinit();      // first user process
