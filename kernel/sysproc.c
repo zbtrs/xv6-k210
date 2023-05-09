@@ -10,6 +10,7 @@
 #include "include/kalloc.h"
 #include "include/string.h"
 #include "include/printf.h"
+#include "include/uname.h"
 
 extern int exec(char *path, char **argv);
 
@@ -304,4 +305,58 @@ sys_gettimeofday(void)
   ts.microSecond = t % 1000000;
   // printf("second: %d, microSecond: %d\n", ts.second, ts.microSecond);
   return copyout2(tt, (char*) &ts, sizeof(TimeSpec));
+}
+
+uint64
+sys_uname(void)
+{
+  uint64 addr;
+  if (argaddr(0, &addr) < 0) 
+    return -1;
+  /*
+  char *sysname = "xv6";
+  char *nodename = "xv6";
+  char *release = "0.1";
+  char *version = "0.1";
+  char *machine = "x86_64";
+  UtsName utsname;
+  strncpy(utsname.sysname, sysname, sizeof(sysname));
+  strncpy(utsname.nodename, nodename, sizeof(nodename));
+  strncpy(utsname.release, release, sizeof(release));
+  strncpy(utsname.version, version, sizeof(version));
+  strncpy(utsname.machine, machine, sizeof(machine));
+  return copyout2(addr, (char*) &utsname, sizeof(UtsName));
+  */
+  struct utsname *uts = (struct utsname*)addr;
+  const char *sysname = "xv6-vf2";
+  const char *nodename = "none";
+  const char *release = "0.1";
+  const char *version = "0.1";
+  const char *machine = "QEMU";
+  const char *domain = "none";
+  if (either_copyout(1,(uint64)uts->sysname,(void*)sysname,sizeof(sysname)) < 0) {
+    return -1;
+  }
+
+  if (either_copyout(1,(uint64)uts->nodename,(void*)nodename,sizeof(nodename)) < 0) {
+    return -1;
+  }
+
+  if (either_copyout(1,(uint64)uts->release,(void*)release,sizeof(release)) < 0) {
+    return -1;
+  }
+
+  if (either_copyout(1,(uint64)uts->version,(void*)version,sizeof(version)) < 0) {
+    return -1;
+  }
+
+  if (either_copyout(1,(uint64)uts->machine,(void*)machine,sizeof(machine)) < 0) {
+    return -1;
+  }
+
+  if (either_copyout(1,(uint64)uts->domainname,(void*)domain,sizeof(domain)) < 0) {
+    return -1;
+  }
+
+  return 0;
 }
