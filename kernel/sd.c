@@ -3,6 +3,8 @@
 #include "include/uart.h"
 #include "include/file.h"
 #include "include/proc.h"
+#include "include/printf.h"
+#include "include/vm.h"
 
 #define MAX_CORES 8
 #define MAX_TIMES 10000
@@ -179,7 +181,7 @@ start:
 	if (sd_cmd(0x52, startSector, 0xE1) != 0x00) {
 	#endif
 		sd_cmd_end();
-		panic("[SD Read]Read Error, retry times %x\n", readTimes);
+		panic("[SD Read]Read Error, retry times\n");
 		return 1;
 	}
 	do {
@@ -264,7 +266,7 @@ start:	p = st;
 		if (sd_cmd(24 | 0x40, now, 0) != 0) {
 		#endif			
 			sd_cmd_end();
-			panic("[SD Write]Write Error, can't use cmd24, retry times %x\n", writeTimes);
+			panic("[SD Write]Write Error, can't use cmd24, retry times\n");
 			return 1;
 		}
 		sd_dummy();
@@ -373,6 +375,29 @@ int sdCardWrite(int isUser, uint64 src, uint64 startAddr, uint64 n) {
 	return 0;
 }
 
+uint8 binary[1024];
+int sdTest(void) {
+	// sdInit();
+    for (int j = 0; j < 20; j += 2) {
+        for (int i = 0; i < 1024; i++) {
+            binary[i] = i & 7;
+        }
+        sdWrite(binary, j, 2);
+        for (int i = 0; i < 1024; i++) {
+            binary[i] = 0;
+        }
+        sdRead(binary, j, 2);
+        for (int i = 0; i < 1024; i++) {
+            if (binary[i] != (i & 7)) {
+                panic("gg");
+                break;
+            }
+        }
+        printf("finish %d\n", j);
+    }
+	return 0;
+}
+
 
 int sdInit(void) {
 	REG32(uart, UART_REG_TXCTRL) = UART_TXEN;
@@ -415,25 +440,3 @@ int sdInit(void) {
 	return 0;
 }
 
-uint8 binary[1024];
-int sdTest(void) {
-	sdInit();
-    for (int j = 0; j < 20; j += 2) {
-        for (int i = 0; i < 1024; i++) {
-            binary[i] = i & 7;
-        }
-        sdWrite(binary, j, 2);
-        for (int i = 0; i < 1024; i++) {
-            binary[i] = 0;
-        }
-        sdRead(binary, j, 2);
-        for (int i = 0; i < 1024; i++) {
-            if (binary[i] != (i & 7)) {
-                panic("gg: %d ", j);
-                break;
-            }
-        }
-        printf("finish %d\n", j);
-    }
-	return 0;
-}

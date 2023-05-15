@@ -16,9 +16,9 @@
 #include "include/vm.h"
 #include "include/disk.h"
 #include "include/buf.h"
-#include "include/sd.h"
 #ifndef QEMU
 #include "include/sdcard.h"
+#include "include/sd.h"
 #include "include/fpioa.h"
 #include "include/dmac.h"
 extern void _start(void);
@@ -53,6 +53,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
     timerinit();     // init a lock for timer
     trapinithart();  // install kernel trap vector, including interrupt handler
     procinit();
+    sdInit();
     plicinit();
     plicinithart();
     #ifdef k210
@@ -60,7 +61,7 @@ main(unsigned long hartid, unsigned long dtb_pa)
     dmac_init();
     #endif 
     // disk_init();
-    sdInit();
+    
     binit();         // buffer cache
     fileinit();      // file table
     userinit();      // first user process

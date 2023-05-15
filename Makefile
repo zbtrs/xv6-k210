@@ -39,7 +39,7 @@ OBJS += \
   $K/disk.o \
   $K/fat32.o \
   $K/plic.o \
-  $K/console.o
+  $K/console.o \
 
 ifeq ($(platform), qemu)
 OBJS += \
@@ -55,6 +55,7 @@ OBJS += \
   $K/sdcard.o \
   $K/dmac.o \
   $K/sysctl.o \
+  $K/sd.o \
 
 endif
 
