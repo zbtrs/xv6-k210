@@ -27,10 +27,13 @@ struct vma *vma_init(struct proc *p)
     vma->type = NONE;
     vma->prev = vma->next = vma;
     p->vma = vma;
+    
+    if (NULL == alloc_mmap_vma(p,0,USER_MMAP_START,0,0,0,0)) {
+        free_vma_list(p);
+        return NULL;
+    }
 
-    // TODO:分配vma并且在有异常的时候清空
-
-
+    return vma;
 }
 
 struct vma* alloc_vma(struct proc *p,enum segtype type,uint64 addr, uint64 sz,int perm,int alloc,uint64 pa) {
@@ -84,3 +87,63 @@ struct vma* alloc_vma(struct proc *p,enum segtype type,uint64 addr, uint64 sz,in
     return vma;
 }
 
+struct vma* find_mmap_vma(struct vma* head) 
+{
+    struct vma* vma = head ->next;
+    while (vma != head) {
+        if (MMAP == vma->type)
+            return vma;
+        vma = vma->next;
+    }
+    return NULL;
+}
+
+struct vma* alloc_mmap_vma(struct proc *p, int flags, uint64 addr, uint64 sz, int perm, int fd ,uint64 f_off)
+{
+    struct vma* vma = NULL;
+    struct vma* find_vma = find_mmap_vma(p->vma);
+    if (0 == addr) 
+        addr = PGROUNDDOWN(find_vma->addr - sz);
+    vma = alloc_vma(p,MMAP,addr,sz,perm,1,NULL);
+    if (NULL == vma) 
+    {
+        printf("alloc_mmap_vma: alloc_vma failed\n");
+        return NULL;
+    }
+    vma->fd = fd;
+    vma->f_off = f_off;
+    
+    return vma;
+}
+
+int free_vma_list(struct proc* p) 
+{
+    if (NULL == p->vma) {
+        printf("free_vma_list: p->vma is not existing\n");
+        return -1;
+    }
+
+    struct vma* vma = p->vma->next;
+    while(vma != p->vma)
+    {
+        uint64 vma_addr;
+        pte_t *pte;
+        for (vma_addr = vma->addr; vma_addr < vma->end; vma_addr += PGSIZE) {
+            if (0 == (pte = walk(p->pagetable,vma_addr,0)))
+                continue;
+            if (0 == (*pte & PTE_V))
+                continue;
+            if (PTE_V == PTE_FLAGS(*pte))
+                continue;
+            uint64 pa = PTE2PA(*pte);
+            freepage((void*)pa);
+            *pte = 0;
+        }
+        vma = vma->next;
+        kfree(vma->prev);
+    }
+    kfree(vma);
+    p->vma = NULL;
+    
+    return 0;
+}
