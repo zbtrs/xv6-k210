@@ -21,8 +21,8 @@ struct vma {
     struct vma *next;
 };
 
-struct vma *vma_init(struct proc *);
-struct vma *alloc_vma(struct proc *, enum segtype, uint64, uint64, int, int, uint64);
+struct vma *vma_init(struct proc *p);
+struct vma *alloc_vma(struct proc *p, enum segtype, uint64, uint64, int, int, uint64);
 struct vma *alloc_mmap_vma(struct proc *p, int flags, uint64 addr, uint64 sz, int perm, int fd ,uint64 f_off);
 struct vma *find_mmap_vma(struct vma *head);
 int free_vma_list(struct proc *p);

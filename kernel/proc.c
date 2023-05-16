@@ -13,6 +13,7 @@
 #include "include/file.h"
 #include "include/trap.h"
 #include "include/vm.h"
+#include "include/vma.h"
 
 
 struct cpu cpus[NCPU];
@@ -28,6 +29,7 @@ extern void forkret(void);
 extern void swtch(struct context*, struct context*);
 static void wakeup1(struct proc *chan);
 static void freeproc(struct proc *p);
+
 
 extern char trampoline[]; // trampoline.S
 
@@ -140,6 +142,7 @@ allocproc(void)
 
 found:
   p->pid = allocpid();
+  p->vma = NULL;
 
   // Allocate a trapframe page.
   if((p->trapframe = (struct trapframe *)kalloc()) == NULL){
@@ -183,6 +186,7 @@ freeproc(struct proc *p)
   if(p->pagetable)
     proc_freepagetable(p->pagetable, p->sz);
   p->pagetable = 0;
+  p->vma = NULL;
   p->sz = 0;
   p->pid = 0;
   p->parent = 0;
@@ -205,6 +209,10 @@ proc_pagetable(struct proc *p)
   if(pagetable == 0)
     return NULL;
 
+  if (NULL == vma_init(p)) {
+    uvmfree(pagetable, 0);
+    return NULL;
+  }
   // map the trampoline code (for system call return)
   // at the highest user virtual address.
   // only the supervisor uses it, on the way
