@@ -1,6 +1,5 @@
 #include "include/vma.h"
 #include "include/proc.h"
-#include "include/cpu.h"
 #include "include/printf.h"
 #include "include/mmap.h"
 #include "include/types.h"
@@ -10,10 +9,10 @@
 #include "include/kalloc.h"
 #include "include/string.h"
 
-uint64 mmap(uint64 start,uint64 len,int prot,int flags,int fs,off_t offset)
+uint64 mmap(uint64 start,uint64 len,int prot,int flags,int fd,long int offset)
 {
     struct proc *p = myproc();
-    if (fd < 0 || fd > NOFILEMAX || offset < 0 || start % PGSIZE != 0) {
+    if (fd < 0 || offset < 0 || start % PGSIZE != 0) {
         return -1;
     }
     int perm = PTE_U;

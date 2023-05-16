@@ -34,4 +34,5 @@ int             copyinstr2(char *dst, uint64 srcva, uint64 max);
 void            vmprint(pagetable_t pagetable);
 uint64          uvmalloc1(pagetable_t pagetable, uint64 start, uint64 end, int perm);
 uint64          uvmdealloc1(pagetable_t pagetable, uint64 start, uint64 end);
+uint64          experm(pagetable_t pagetable, uint64 va,uint64 perm);
 #endif 

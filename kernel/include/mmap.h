@@ -26,5 +26,5 @@
 
 typedef struct vma map_fix;
 
-uint64 do_mmap(uint64 start, uint64 len,int prot,int flags,int fd, off_t offset);
+uint64 mmap(uint64 start, uint64 len,int prot,int flags,int fd, long int offset);
 #endif

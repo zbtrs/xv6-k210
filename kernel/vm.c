@@ -690,3 +690,24 @@ void vmprint(pagetable_t pagetable)
   }
   return;
 }
+
+uint64
+experm(pagetable_t pagetable, uint64 va,uint64 perm)
+{
+  pte_t *pte;
+  uint64 pa;
+
+  if(va >= MAXVA)
+    return NULL;
+
+  pte = walk(pagetable, va, 0);
+  if(pte == 0)
+    return NULL;
+  if((*pte & PTE_V) == 0)
+    return NULL;
+  if((*pte & PTE_U) == 0)
+    return NULL;
+  *pte |= perm;
+  pa = PTE2PA(*pte);
+  return pa;
+}

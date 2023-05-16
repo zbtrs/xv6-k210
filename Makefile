@@ -40,6 +40,7 @@ OBJS += \
   $K/fat32.o \
   $K/plic.o \
   $K/console.o \
+  $K/mmap.o
 
 
 ifeq ($(platform), k210)

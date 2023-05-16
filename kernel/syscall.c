@@ -128,6 +128,7 @@ extern uint64 sys_wait4(void);
 extern uint64 sys_getdents64(void);
 extern uint64 sys_openat(void);
 extern uint64 sys_gettimeofday(void);
+extern uint64 sys_mmap(void);
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -168,6 +169,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_getdents64]  sys_getdents64,
   [SYS_openat]      sys_openat,
   [SYS_gettimeofday] sys_gettimeofday,
+  [SYS_mmap]      sys_mmap,
 };
 
 static char *sysnames[] = {
@@ -207,6 +209,7 @@ static char *sysnames[] = {
   [SYS_wait4]       "wait4",
   [SYS_getdents64]  "getdents64",
   [SYS_openat]      "openat",
+  [SYS_mmap]      "mmap",
 };
 
 void
