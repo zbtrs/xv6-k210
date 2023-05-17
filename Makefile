@@ -123,7 +123,7 @@ gdb-server: build
 gdb-client:
 	gdb-multiarch -quiet -ex "set architecture riscv:rv64" -ex "target remote localhost:1234" target/kernel
 
-qemu-run:
+all:
 	@make build platform=qemu
 	@make fs
 	@$(QEMU) $(QEMUOPTS)

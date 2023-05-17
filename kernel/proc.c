@@ -570,6 +570,10 @@ exit(int status)
 
   // Parent might be sleeping in wait().
   wakeup1(original_parent);
+  // Parent might be sleeping in wait4pid().
+  if(original_parent->chan == p && original_parent->state == SLEEPING){
+    original_parent->state = RUNNABLE;
+  }
 
   p->xstate = status;
   p->state = ZOMBIE;
@@ -966,4 +970,12 @@ int wait4pid(int pid,uint64 addr,int options)
   return 0;
 
   // TODO: deal with options
+}
+
+
+uint64
+sys_yield()
+{
+  yield();
+  return 0;
 }

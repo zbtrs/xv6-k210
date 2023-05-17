@@ -130,6 +130,8 @@ extern uint64 sys_openat(void);
 extern uint64 sys_gettimeofday(void);
 extern uint64 sys_mmap(void);
 extern uint64 sys_munmap(void);
+extern uint64 sys_yield();
+extern uint64 sys_uname();
 
 static uint64 (*syscalls[])(void) = {
   [SYS_fork]        sys_fork,
@@ -172,6 +174,8 @@ static uint64 (*syscalls[])(void) = {
   [SYS_gettimeofday] sys_gettimeofday,
   [SYS_mmap]      sys_mmap,
   [SYS_munmap]    sys_munmap,
+  [SYS_sched_yield]       sys_yield,
+  [SYS_uname]       sys_uname,
 };
 
 static char *sysnames[] = {
@@ -213,6 +217,7 @@ static char *sysnames[] = {
   [SYS_openat]      "openat",
   [SYS_mmap]      "mmap",
   [SYS_munmap]    "munmap",
+  [SYS_uname]       "uname",
 };
 
 void
