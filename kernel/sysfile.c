@@ -20,6 +20,7 @@
 #include "include/string.h"
 #include "include/printf.h"
 #include "include/vm.h"
+#include "include/mmap.h"
 
 
 // Fetch the nth word-sized system call argument as a file descriptor
@@ -664,4 +665,28 @@ sys_openat()
   }
   
   return fd;
+}
+
+uint64
+sys_mmap()
+{
+  uint64 start,len;
+  int prot,flags,fd,off;
+  if (argaddr(0,&start) < 0 || argaddr(1,&len) < 0 || argint(2,&prot) < 0 || argint(3,&flags) < 0 || (argfd(4,&fd,NULL) < 0 && fd != -1) || argint(5,&off) < 0) {
+    return -1;
+  }
+  return mmap(start,len,prot,flags,fd,off);
+}
+
+uint64
+sys_munmap()
+{
+  uint64 start,len;
+  if (argaddr(0,&start) < 0 || argaddr(1,&len) < 0) {
+    return -1;
+  }
+
+  // TODO
+  //return munmap(start,len);
+  return 0;
 }

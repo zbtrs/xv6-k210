@@ -125,5 +125,7 @@
 #define TRAPFRAME               (TRAMPOLINE - PGSIZE)
 
 #define MAXUVA                  RUSTSBI_BASE
+#define USER_STACK_BOTTOM (MAXUVA - (2*PGSIZE))
+#define USER_MMAP_START (USER_STACK_BOTTOM - 0x10000000)
 
 #endif

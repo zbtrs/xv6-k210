@@ -21,8 +21,8 @@ OBJS += \
   $K/spinlock.o \
   $K/string.o \
   $K/main.o \
-  $K/vm.o \
   $K/proc.o \
+  $K/vm.o \
   $K/swtch.o \
   $K/trampoline.o \
   $K/trap.o \
@@ -39,7 +39,9 @@ OBJS += \
   $K/disk.o \
   $K/fat32.o \
   $K/plic.o \
-  $K/console.o
+  $K/console.o \
+  $K/mmap.o
+
 
 ifeq ($(platform), k210)
 OBJS += \

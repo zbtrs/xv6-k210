@@ -17,9 +17,9 @@
 * [X] test_getppid
 * [X] test_gettimeofday
 * [X] test_mkdir_
-* [ ] test_mmap
+* [X] test_mmap
 * [ ] test_mount
-* [ ] test_munmap
+* [X] test_munmap
 * [X] test_open
 * [x] test_openat
 * [X] test_pipe

@@ -279,6 +279,48 @@ uvminit(pagetable_t pagetable, pagetable_t kpagetable, uchar *src, uint sz)
   // }
 }
 
+uint64
+uvmalloc1(pagetable_t pagetable, uint64 start, uint64 end, int perm)
+{
+  char *mem;
+  uint64 a;
+  if(start>=end)return -1;
+  for(a = start; a < end; a += PGSIZE){
+    mem = kalloc();
+    if(mem == NULL){
+      uvmdealloc1(pagetable, start, a);
+      printf("uvmalloc kalloc failed\n");
+      return -1;
+    }
+    memset(mem, 0, PGSIZE);
+    if (mappages(pagetable, a, PGSIZE, (uint64)mem, perm) != 0) {
+      kfree(mem);
+      uvmdealloc1(pagetable, start, a);
+      printf("[uvmalloc]map user page failed\n");
+      return -1;
+    }
+  }
+  return 0;
+}
+
+// Deallocate user pages to bring the process size from oldsz to
+// newsz.  oldsz and newsz need not be page-aligned, nor does newsz
+// need to be less than oldsz.  oldsz can be larger than the actual
+// process size.  Returns the new process size.
+uint64
+uvmdealloc1(pagetable_t pagetable, uint64 start, uint64 end)
+{
+  
+  if(start>=end)return -1;
+  if(PGROUNDUP(start) < PGROUNDUP(end)){
+    int npages = (PGROUNDUP(end) - PGROUNDUP(start)) / PGSIZE;
+    vmunmap(pagetable, PGROUNDUP(start), npages, 1);
+  }
+
+  return 0;
+}
+
+
 // Allocate PTEs and physical memory to grow process from oldsz to
 // newsz, which need not be page aligned.  Returns new size or 0 on error.
 uint64
@@ -346,7 +388,8 @@ freewalk(pagetable_t pagetable)
       freewalk((pagetable_t)child);
       pagetable[i] = 0;
     } else if(pte & PTE_V){
-      panic("freewalk: leaf");
+      //panic("freewalk: leaf");
+      continue;
     }
   }
   kfree((void*)pagetable);
@@ -647,4 +690,25 @@ void vmprint(pagetable_t pagetable)
     }
   }
   return;
+}
+
+uint64
+experm(pagetable_t pagetable, uint64 va,uint64 perm)
+{
+  pte_t *pte;
+  uint64 pa;
+
+  if(va >= MAXVA)
+    return NULL;
+
+  pte = walk(pagetable, va, 0);
+  if(pte == 0)
+    return NULL;
+  if((*pte & PTE_V) == 0)
+    return NULL;
+  if((*pte & PTE_U) == 0)
+    return NULL;
+  *pte |= perm;
+  pa = PTE2PA(*pte);
+  return pa;
 }

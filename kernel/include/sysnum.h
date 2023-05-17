@@ -40,6 +40,8 @@
 #define SYS_getdents64  61
 #define SYS_openat      56
 #define SYS_gettimeofday 169
+#define SYS_mmap        222
+#define SYS_munmap      215
 #define SYS_sched_yield 124
 #define SYS_uname       160
 #endif
