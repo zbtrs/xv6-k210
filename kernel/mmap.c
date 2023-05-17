@@ -16,10 +16,13 @@ uint64 mmap(uint64 start,uint64 len,int prot,int flags,int fd,long int offset)
         return -1;
     }
     int perm = PTE_U;
+    /*
     if(prot & PROT_READ) 
         perm  |= (PTE_R | PTE_A);
     if(prot & PROT_WRITE)
         perm  |= (PTE_W | PTE_D);
+        */
+    perm |= PTE_W | PTE_R | PTE_A | PTE_D;
     struct file *f = fd == -1 ? NULL : p->ofile[fd];
     if(fd != -1 && f == NULL)
         return -1;

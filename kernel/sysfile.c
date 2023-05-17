@@ -677,3 +677,16 @@ sys_mmap()
   }
   return mmap(start,len,prot,flags,fd,off);
 }
+
+uint64
+sys_munmap()
+{
+  uint64 start,len;
+  if (argaddr(0,&start) < 0 || argaddr(1,&len) < 0) {
+    return -1;
+  }
+
+  // TODO
+  //return munmap(start,len);
+  return 0;
+}

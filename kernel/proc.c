@@ -837,10 +837,10 @@ kill(int pid)
 int
 either_copyout(int user_dst, uint64 dst, void *src, uint64 len)
 {
-  // struct proc *p = myproc();
+  struct proc *p = myproc();
   if(user_dst){
-    // return copyout(p->pagetable, dst, src, len);
-    return copyout2(dst, src, len);
+    return copyout(p->pagetable, dst, src, len);
+    //return copyout2(dst, src, len);
   } else {
     memmove((char *)dst, src, len);
     return 0;
@@ -853,10 +853,10 @@ either_copyout(int user_dst, uint64 dst, void *src, uint64 len)
 int
 either_copyin(void *dst, int user_src, uint64 src, uint64 len)
 {
-  // struct proc *p = myproc();
+  struct proc *p = myproc();
   if(user_src){
-    // return copyin(p->pagetable, dst, src, len);
-    return copyin2(dst, src, len);
+    return copyin(p->pagetable, dst, src, len);
+    //return copyin2(dst, src, len);
   } else {
     memmove(dst, (char*)src, len);
     return 0;
