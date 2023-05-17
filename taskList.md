@@ -17,19 +17,19 @@
 * [X] test_getppid
 * [X] test_gettimeofday
 * [X] test_mkdir_
-* [ ] test_mmap
+* [X] test_mmap
 * [ ] test_mount
-* [ ] test_munmap
+* [X] test_munmap
 * [X] test_open
 * [x] test_openat
 * [X] test_pipe
 * [X] test_read
-* [ ] test_sleep
+* [X] test_sleep
 * [ ] test_times
 * [ ] test_umount
-* [ ] test_uname
+* [X] test_uname
 * [ ] test_unlink
 * [X] test_wait
-* [ ] test_waitpid
+* [X] test_waitpid
 * [X] test_write
-* [ ] test_yield
+* [X] test_yield
