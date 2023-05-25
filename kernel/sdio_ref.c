@@ -46,6 +46,8 @@
 
 #define TICKRATE_HZ1 (1000)	/* 10 ticks per second */
 
+void SDIO_IRQHandler(void);
+
 static volatile uint32 ms_cnt;
 /*****************************************************************************
  * Public types/enumerations/variables
@@ -75,6 +77,24 @@ static struct sdio_state
 
 static volatile uint32 card_int;
 
+
+static uint32 wait_for_sdio_irq(LPC_SDMMC_T *pSDMMC)
+{
+	uint32 mintst;
+	printf("INTMASK: %p", pSDMMC->INTMASK);
+	while (1)
+	{
+		mintst = pSDMMC->MINTSTS;
+		printf("mintst: %p\n", mintst);
+		if (mintst & 0xffff0000)
+		{
+			break;
+		}
+	}
+	SDIO_IRQHandler();
+	return 0;
+}
+
 static uint32 SDIO_WaitEvent(LPC_SDMMC_T *pSDMMC, uint32 event, uint32 arg)
 {
 	uint32 ret = 0;
@@ -91,6 +111,7 @@ static uint32 SDIO_WaitEvent(LPC_SDMMC_T *pSDMMC, uint32 event, uint32 arg)
 		case SDIO_WAIT_COMMAND:
 			while (*((volatile enum SDIO_STATE *) &sstate.cstate) == SDIO_STATE_CMD_WAIT) {
 				// __WFI();
+				wait_for_sdio_irq(pSDMMC);
 				printf("WFI\n");
 			}
 			ret = sstate.carg;
@@ -99,6 +120,7 @@ static uint32 SDIO_WaitEvent(LPC_SDMMC_T *pSDMMC, uint32 event, uint32 arg)
 		case SDIO_WAIT_DATA:
 			while (*((volatile enum SDIO_STATE *) &sstate.dstate) == SDIO_STATE_DATA_WAIT) {
 				// __WFI();
+				wait_for_sdio_irq(pSDMMC);
 				printf("WFI\n");
 			}
 			ret = sstate.darg;
@@ -266,6 +288,12 @@ int sdref_test(void)
 	/* FIXME: Gainspan card works at (20MHz) frequency; needs investigation
 	 * All other cards should use 400000 (400 KHz)
 	 */
+
+	/* Enable the SDIO Card Interrupt */
+	if (!SDIO_Card_EnableInt(LPC_SDMMC, 1)) {
+		printf("DBG: Enabled interrupt for function 1\r\n");
+	}
+
 	ret = SDIO_Card_Init(LPC_SDMMC, 20000000);
 	printf("arrive 4\n");
 	//	ret = SDIO_Card_Init(LPC_SDMMC, 400000);
@@ -282,10 +310,7 @@ int sdref_test(void)
 		printf("DBG: Block size set to 512\r\n");
 	}
 
-	/* Enable the SDIO Card Interrupt */
-	if (!SDIO_Card_EnableInt(LPC_SDMMC, 1)) {
-		printf("DBG: Enabled interrupt for function 1\r\n");
-	}
+	
 	printf("Card interface enabled use AT commands!\r\n");
 
 	while (1) {
