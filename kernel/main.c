@@ -18,9 +18,9 @@
 #include "include/buf.h"
 #ifndef QEMU
 #include "include/sdcard.h"
-#include "include/sd.h"
 #include "include/fpioa.h"
 #include "include/dmac.h"
+#include "include/sdio_ref.h"
 extern void _start(void);
 #endif
 extern void _entry(void);
@@ -47,13 +47,18 @@ main(unsigned long hartid, unsigned long dtb_pa)
     #ifdef DEBUG
     printf("hart %d enter main()...\n", hartid);
     #endif
+    
+    sdref_test();
+
+    // sd_test();
+    // sdInit();
     kinit();         // physical page allocator
     kvminit();       // create kernel page table
     kvminithart();   // turn on paging
     timerinit();     // init a lock for timer
     trapinithart();  // install kernel trap vector, including interrupt handler
     procinit();
-    sdInit();
+    // sdInit();
     plicinit();
     plicinithart();
     #ifdef k210

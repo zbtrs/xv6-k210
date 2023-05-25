@@ -1,4 +1,4 @@
-#define SPI_CTRL_ADDR 0x13010000
+#define SPI_CTRL_ADDR 0x16020000
 
 // See LICENSE for license details.
 

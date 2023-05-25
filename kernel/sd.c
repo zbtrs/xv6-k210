@@ -54,7 +54,7 @@ static uint8 sd_cmd(uint8 cmd, uint32 arg, uint8 crc)
 	do {
 		r = sd_dummy();
 		if (!(r & 0x80)) {
-			//printf("sd:cmd: %x\r\n", r);
+			printf("sd:cmd: %x\r\n", r);
 			goto done;
 		}
 	} while (--n > 0);
@@ -405,6 +405,9 @@ int sdInit(void) {
 	sd_poweron(3000);
 
 	int initTimes = 10;
+	
+	printf("sd:cmd: %x\r\n", sd_dummy());
+
 	while (initTimes > 0 && sd_cmd0()) {
 		initTimes--;
 	}
