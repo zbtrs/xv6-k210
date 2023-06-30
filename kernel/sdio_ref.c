@@ -80,13 +80,12 @@ static volatile uint32 card_int;
 
 static uint32 wait_for_sdio_irq(LPC_SDMMC_T *pSDMMC)
 {
-	uint32 mintst;
-	printf("INTMASK: %p", pSDMMC->INTMASK);
+	uint32 rintst;
 	while (1)
 	{
-		mintst = pSDMMC->MINTSTS;
-		printf("mintst: %p\n", mintst);
-		if (mintst & 0xffff0000)
+		rintst = pSDMMC->RINTSTS;
+		printf("rintst: %p\n", rintst);
+		if (rintst & 0xffff0004)
 		{
 			break;
 		}
@@ -289,14 +288,9 @@ int sdref_test(void)
 	 * All other cards should use 400000 (400 KHz)
 	 */
 
-	/* Enable the SDIO Card Interrupt */
-	if (!SDIO_Card_EnableInt(LPC_SDMMC, 1)) {
-		printf("DBG: Enabled interrupt for function 1\r\n");
-	}
-
-	ret = SDIO_Card_Init(LPC_SDMMC, 20000000);
+	// ret = SDIO_Card_Init(LPC_SDMMC, 20000000);
 	printf("arrive 4\n");
-	//	ret = SDIO_Card_Init(LPC_SDMMC, 400000);
+		ret = SDIO_Card_Init(LPC_SDMMC, 400000);
 	if (ret != 0) {
 		printf("DBG: SDIO Card init error: 0x%X, %d\r\n", ret, ret);
 	}
@@ -310,6 +304,10 @@ int sdref_test(void)
 		printf("DBG: Block size set to 512\r\n");
 	}
 
+	/* Enable the SDIO Card Interrupt */
+	if (!SDIO_Card_EnableInt(LPC_SDMMC, 1)) {
+		printf("DBG: Enabled interrupt for function 1\r\n");
+	}
 	
 	printf("Card interface enabled use AT commands!\r\n");
 

@@ -333,8 +333,8 @@ int SDIO_Card_Init(LPC_SDMMC_T *pSDMMC, uint32 freq)
 	uint32 val;
 
 	/* Set Clock to 400KHz */
-	// Chip_SDIF_SetClock(pSDMMC, Chip_Clock_GetBaseClocktHz(CLK_BASE_SDIO), freq);
 	Chip_SDIF_SetCardType(pSDMMC, 0);
+	Chip_SDIF_SetClock(pSDMMC, 200000000, freq);
 	printf("arrive a0\n");
 	sdioif->wait_evt(pSDMMC, SDIO_WAIT_DELAY, 100); /* Wait for card to wake up */
 
@@ -345,6 +345,8 @@ int SDIO_Card_Init(LPC_SDMMC_T *pSDMMC, uint32 freq)
 		if (ret) return ret;
 	}
 	printf("arrive b\n");
+
+
 	/* Set Voltage level to 3v3 */
 	ret = SDIO_Card_SetVoltage(pSDMMC);
 	if (ret) return ret;

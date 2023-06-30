@@ -66,12 +66,15 @@ void Chip_SDIF_Init(LPC_SDMMC_T *pSDMMC)
 		printf("ctrl:%p\n", pSDMMC->CTRL);
 	}
 
+	/* Clear the interrupts for the host controller */
+	pSDMMC->RINTSTS = 0xFFFFFFFF;
+
 	/* Internal DMA setup for control register */
 	pSDMMC->CTRL = MCI_CTRL_USE_INT_DMAC | MCI_CTRL_INT_ENABLE;
 	pSDMMC->INTMASK = 0;
 
-	/* Clear the interrupts for the host controller */
-	pSDMMC->RINTSTS = 0xFFFFFFFF;
+	
+
 
 	/* Put in max timeout */
 	pSDMMC->TMOUT = 0xFFFFFFFF;
