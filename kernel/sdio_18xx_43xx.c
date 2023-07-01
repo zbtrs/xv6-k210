@@ -54,6 +54,22 @@ static struct
 	sdif_device sdev;      /* SDIO interface device structure */
 }sdio_context, *sdioif = &sdio_context;
 
+uint32 wait_for_sdio_irq(LPC_SDMMC_T *pSDMMC)
+{
+	uint32 rintst;
+	while (1)
+	{
+		rintst = pSDMMC->RINTSTS;
+		printf("rintst: %p\n", rintst);
+		if (rintst & 0xffff0004)
+		{
+			break;
+		}
+	}
+	SDIO_IRQHandler();
+	return 0;
+}
+
 /*****************************************************************************
  * Public types/enumerations/variables
  ****************************************************************************/
@@ -68,10 +84,12 @@ static int SDIO_Card_SetVoltage(LPC_SDMMC_T *pSDMMC)
 	int ret, i;
 	uint32 val;
 
+	printf("%p\n",pSDMMC->RINTSTS);
+	printf("responese: %p\n", pSDMMC->RESP0);
 	ret = SDIO_Send_Command(pSDMMC, CMD5, 0);
-	if (ret) return ret;
+	// if (ret) return ret;
 	val = sdioif->response[0];
-
+	printf("response: %p\n", val);
 	/* Number of functions supported by the card */
 	sdioif->fnum = (val >> 28) & 7;
 
@@ -184,6 +202,25 @@ int SDIO_Card_SetBlockSize(LPC_SDMMC_T *pSDMMC, uint32 func, uint32 blkSize)
 	return 0;
 }
 
+/*****************************************************************************
+ * Public functions
+ ****************************************************************************/
+/* Set the block size of a function */
+int SD_Card_SetBlockSize(LPC_SDMMC_T *pSDMMC, uint32 blkSize, uint32 rca)
+{
+	uint32 val;
+	SDIO_Send_Command(pSDMMC, CMD7, rca);
+	val = sdioif->response[0];
+	printf("response: %p\n", val);
+
+	SDIO_Send_Command(pSDMMC, CMD16, blkSize);
+	val = sdioif->response[0];
+	printf("response: %p\n", val);
+
+	pSDMMC->BLKSIZ = 512;
+
+}
+
 /* Get the block size of a particular function */
 uint32 SDIO_Card_GetBlockSize(LPC_SDMMC_T *pSDMMC, uint32 func)
 {
@@ -238,6 +275,11 @@ int SDIO_Card_WriteData(LPC_SDMMC_T *pSDMMC, uint32 func,
 	}
 	return sdioif->wait_evt(pSDMMC, SDIO_WAIT_DATA, 0);
 }
+
+// int SD_Card_ReadData(LPC_SDMMC_T *pSDMMC,)
+// {
+	
+// }
 
 /* Write data to SDIO Card */
 int SDIO_Card_ReadData(LPC_SDMMC_T *pSDMMC, uint32 func, uint8 *dest_addr, uint32 src_addr, uint32 size, uint32 flags)
@@ -385,6 +427,75 @@ int SDIO_Card_Init(LPC_SDMMC_T *pSDMMC, uint32 freq)
 	return SDIO_Card_SetMode(pSDMMC, SDIO_CLK_LOWSPEED, val & SDIO_CCCR_4BLS);
 }
 
+/*
+	Initialize sd card
+	return value of rca
+	by comedymaker
+*/
+uint32 SD_Card_Init(LPC_SDMMC_T *pSDMMC, uint32 freq)
+{
+	int ret;
+	uint32 val;
+	uint32 rca;
+	/* Set Clock to 400KHz */
+	Chip_SDIF_SetCardType(pSDMMC, 0);
+	Chip_SDIF_SetClock(pSDMMC, 200000000, freq);
+	printf("arrive a0\n");
+	sdioif->wait_evt(pSDMMC, SDIO_WAIT_DELAY, 100); /* Wait for card to wake up */
+
+	printf("arrive a\n");
+	printf("RINTSTS: %p\n",pSDMMC->RINTSTS);
+	printf("responese: %p\n", pSDMMC->RESP0);
+	ret = SDIO_Send_Command(pSDMMC, CMD5, 0);
+	// if (ret) return ret;
+	val = sdioif->response[0];
+	printf("response: %p\n", val);
+	printf("arrive b\n");
+
+	printf("RINTSTS: %p\n",pSDMMC->RINTSTS);
+	ret = SDIO_Send_Command(pSDMMC, CMD0, 0);
+	// if (ret) return ret;
+	val = sdioif->response[0];
+	printf("response: %p\n", val);
+
+	printf("RINTSTS: %p\n",pSDMMC->RINTSTS);
+
+	SDIO_Send_Command(pSDMMC, CMD8, 0x1aa);
+	val = sdioif->response[0];
+	printf("response: %p\n", val);
+	printf("arrive c\n");
+
+
+	do
+	{
+		SDIO_Send_Command(pSDMMC, CMD55, 0);
+		SDIO_Send_Command(pSDMMC, ACMD41, 0x40100000);
+		val = sdioif->response[0];
+	} while ((val & 0x80000000) == 0);
+	
+	printf("response: %p\n", val);
+	printf("arrive d\n");
+
+	SDIO_Send_Command(pSDMMC, CMD2, 0);
+	printf("response3: %p\n", sdioif->response[3]);
+	printf("response3: %p\n", sdioif->response[2]);
+	printf("response3: %p\n", sdioif->response[1]);
+	printf("response3: %p\n", sdioif->response[0]);
+	printf("arrive e\n");
+
+	SDIO_Send_Command(pSDMMC, CMD3, 0);
+	val = sdioif->response[0];
+	printf("response: %p\n", val);
+	printf("arrive e\n");
+	
+	rca = (val & 0xffff0000);
+	printf("rca: %p\n", rca);
+
+	Chip_SDIF_SetClock(pSDMMC, 200000000, 25000000);
+	return rca;
+
+}
+
 /* Write given data to register space of the CARD */
 int SDIO_Write_Direct(LPC_SDMMC_T *pSDMMC, uint32 func, uint32 addr, uint32 data)
 {
@@ -463,8 +574,9 @@ uint32 SDIO_Send_Command(LPC_SDMMC_T *pSDMMC, uint32 cmd, uint32 arg)
 {
 	uint32 ret, ival;
 	uint32 imsk = pSDMMC->INTMASK;
-	ret = sdioif->wait_evt(pSDMMC, SDIO_START_COMMAND, (cmd & 0x3F));
-	ival = SDIO_CMD_INT_MSK & ~ret;
+	// ret = sdioif->wait_evt(pSDMMC, SDIO_START_COMMAND, (cmd & 0x3F));
+	// ival = SDIO_CMD_INT_MSK & ~ret;
+	ival = SDIO_CMD_INT_MSK;
 
 	/* Set data interrupts for data commands */
 	if (cmd & SDIO_CMD_DATA) {
@@ -474,11 +586,14 @@ uint32 SDIO_Send_Command(LPC_SDMMC_T *pSDMMC, uint32 cmd, uint32 arg)
 
 	Chip_SDIF_SetIntMask(pSDMMC, ival);
 	Chip_SDIF_SendCmd(pSDMMC, cmd, arg);
-	ret = sdioif->wait_evt(pSDMMC, SDIO_WAIT_COMMAND, 0);
-	if (!ret && (cmd & SDIO_CMD_RESP_R1)) {
-		Chip_SDIF_GetResponse(pSDMMC, &sdioif->response[0]);
-	}
+	// ret = sdioif->wait_evt(pSDMMC, SDIO_WAIT_COMMAND, 0);
+	wait_for_sdio_irq(pSDMMC);
+	pSDMMC->RINTSTS = 0xFFFFFFFF;	//clear interrupt
+	// if (!ret && (cmd & SDIO_CMD_RESP_R1)) {
+	// 	Chip_SDIF_GetResponse(pSDMMC, &sdioif->response[0]);
+	// }
 
+	Chip_SDIF_GetResponse(pSDMMC, &sdioif->response[0]);
 	Chip_SDIF_SetIntMask(pSDMMC, imsk);
 	return ret;
 }

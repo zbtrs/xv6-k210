@@ -67,10 +67,12 @@ void Chip_SDIF_Init(LPC_SDMMC_T *pSDMMC)
 	}
 
 	/* Clear the interrupts for the host controller */
+	pSDMMC->PWREN = 1;
 	pSDMMC->RINTSTS = 0xFFFFFFFF;
 
 	/* Internal DMA setup for control register */
-	pSDMMC->CTRL = MCI_CTRL_USE_INT_DMAC | MCI_CTRL_INT_ENABLE;
+	// pSDMMC->CTRL = MCI_CTRL_USE_INT_DMAC | MCI_CTRL_INT_ENABLE;
+	pSDMMC->CTRL = MCI_CTRL_INT_ENABLE;
 	pSDMMC->INTMASK = 0;
 
 	
@@ -80,10 +82,10 @@ void Chip_SDIF_Init(LPC_SDMMC_T *pSDMMC)
 	pSDMMC->TMOUT = 0xFFFFFFFF;
 
 	/* FIFO threshold settings for DMA, DMA burst of 4,   FIFO watermark at 16 */
-	pSDMMC->FIFOTH = MCI_FIFOTH_DMA_MTS_4 | MCI_FIFOTH_RX_WM((SD_FIFO_SZ / 2) - 1) | MCI_FIFOTH_TX_WM(SD_FIFO_SZ / 2);
+	// pSDMMC->FIFOTH = MCI_FIFOTH_DMA_MTS_4 | MCI_FIFOTH_RX_WM((SD_FIFO_SZ / 2) - 1) | MCI_FIFOTH_TX_WM(SD_FIFO_SZ / 2);
 
 	/* Enable internal DMA, burst size of 4, fixed burst */
-	pSDMMC->BMOD = MCI_BMOD_DE | MCI_BMOD_PBL4 | MCI_BMOD_DSL(4);
+	// pSDMMC->BMOD = MCI_BMOD_DE | MCI_BMOD_PBL4 | MCI_BMOD_DSL(4);
 
 	/* disable clock to CIU (needs latch) */
 	pSDMMC->CLKENA = 0;

@@ -75,11 +75,17 @@ enum SDIO_EVENT
 
 /** @brief	List of commands */
 #define CMD0            (0 | (1 << 15))
+#define CMD2			(2 | SDIO_CMD_RESP_R2)
+#define CMD3			(3 | SDIO_CMD_RESP_R6)
 #define CMD5            (5 | SDIO_CMD_RESP_R4)
+#define CMD8			(8 | (1UL << 6))
 #define CMD3            (3 | SDIO_CMD_RESP_R6)
 #define CMD7            (7 | SDIO_CMD_RESP_R1)
+#define CMD16           (16 | SDIO_CMD_RESP_R1)
 #define CMD52           (52 | SDIO_CMD_RESP_R5 | SDIO_CMD_CRC)
 #define CMD53           (53 | SDIO_CMD_RESP_R5 | SDIO_CMD_DATA | SDIO_CMD_CRC)
+#define CMD55			(55 | (1UL << 6))
+#define ACMD41			(41 | (1UL << 6))
 
 /** @brief SDIO Error numbers */
 #define SDIO_ERROR           -1 /**! General SDIO Error */
@@ -126,6 +132,8 @@ enum SDIO_EVENT
 #define SDIO_CLK_FULLSPEED          16000000UL    /* Full-Speed Clock	*/
 #define SDIO_CLK_LOWSPEED           400000        /* Low-Speed Clock	*/
 
+uint32 wait_for_sdio_irq(LPC_SDMMC_T *pSDMMC);
+
 /**
  * @brief	Initialize the SDIO card
  * @param	pSDMMC		: SDMMC peripheral selected
@@ -134,6 +142,14 @@ enum SDIO_EVENT
  */
 int SDIO_Card_Init(LPC_SDMMC_T *pSDMMC, uint32 freq);
 
+
+/**
+ * @brief	Initialize the SD card
+ * @param	pSDMMC		: SDMMC peripheral selected
+ * @param	freq		: Initial frequency to use during the enumeration
+ * @return	value of rca
+ */
+uint32 SD_Card_Init(LPC_SDMMC_T *pSDMMC, uint32 freq);
 /**
  * @brief	Write 8-Bit register from SDIO register space
  * @param	pSDMMC		: SDMMC peripheral selected
@@ -220,6 +236,8 @@ uint32 SDIO_Card_GetBlockSize(LPC_SDMMC_T *pSDMMC, uint32 func);
  * does not support block transfers.
  */
 int SDIO_Card_SetBlockSize(LPC_SDMMC_T *pSDMMC, uint32 func, uint32 blkSize);
+
+int SD_Card_SetBlockSize(LPC_SDMMC_T *pSDMMC, uint32 blkSize, uint32 rca);
 
 /**
  * @brief	Writes stream or block of data to the SDIO card [Using CMD53]
