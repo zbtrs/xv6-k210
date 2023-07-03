@@ -70,6 +70,22 @@ uint32 wait_for_sdio_irq(LPC_SDMMC_T *pSDMMC)
 	return 0;
 }
 
+uint32 wait_for_read_irq(LPC_SDMMC_T *pSDMMC)
+{
+	uint32 rintst;
+	while (1)
+	{
+		rintst = pSDMMC->RINTSTS;
+		printf("rintst: %p\n", rintst);
+		if (rintst & 0x20)
+		{
+			break;
+		}
+	}
+	SDIO_IRQHandler();
+	return 0;
+}
+
 /*****************************************************************************
  * Public types/enumerations/variables
  ****************************************************************************/
@@ -276,10 +292,6 @@ int SDIO_Card_WriteData(LPC_SDMMC_T *pSDMMC, uint32 func,
 	return sdioif->wait_evt(pSDMMC, SDIO_WAIT_DATA, 0);
 }
 
-// int SD_Card_ReadData(LPC_SDMMC_T *pSDMMC,)
-// {
-	
-// }
 
 /* Write data to SDIO Card */
 int SDIO_Card_ReadData(LPC_SDMMC_T *pSDMMC, uint32 func, uint8 *dest_addr, uint32 src_addr, uint32 size, uint32 flags)
@@ -323,6 +335,21 @@ int SDIO_Card_ReadData(LPC_SDMMC_T *pSDMMC, uint32 func, uint8 *dest_addr, uint3
 	}
 
 	return sdioif->wait_evt(pSDMMC, SDIO_WAIT_DATA, 0);
+}
+
+int SD_Card_ReadData(LPC_SDMMC_T *pSDMMC, uint32 size)
+{
+	pSDMMC->BLKSIZ = 512;
+	if (size % 512)
+	{
+		pSDMMC->BYTCNT = ((size % 512) + 1) * 512;
+	}
+	else
+	{
+		pSDMMC->BYTCNT = size;
+	}
+	
+	
 }
 
 /* Enable SDIO function interrupt */
@@ -597,6 +624,7 @@ uint32 SDIO_Send_Command(LPC_SDMMC_T *pSDMMC, uint32 cmd, uint32 arg)
 	Chip_SDIF_SetIntMask(pSDMMC, imsk);
 	return ret;
 }
+
 
 /* SDIO Card interrupt handler */
 void SDIO_Handler(LPC_SDMMC_T *pSDMMC)

@@ -70,8 +70,10 @@ enum SDIO_EVENT
 #define SDIO_CMD_RESP_R6     (1UL << 6)
 
 /** @brief	SDIO Command misc options */
+#define SD_WAIT_PRE			 (1UL << 13)
 #define SDIO_CMD_CRC         (1UL << 8)  /**! Response must have a valid CRC */
 #define SDIO_CMD_DATA        (1UL << 9)  /**! Command is a data transfer command */
+#define SD_CMD_WRITE		(1L << 10)
 
 /** @brief	List of commands */
 #define CMD0            (0 | (1 << 15))
@@ -82,6 +84,8 @@ enum SDIO_EVENT
 #define CMD3            (3 | SDIO_CMD_RESP_R6)
 #define CMD7            (7 | SDIO_CMD_RESP_R1)
 #define CMD16           (16 | SDIO_CMD_RESP_R1)
+#define CMD17           (17 | SDIO_CMD_RESP_R1 | SDIO_CMD_DATA | SD_WAIT_PRE)
+#define CMD24           (24 | SDIO_CMD_RESP_R1 | SDIO_CMD_DATA | SD_CMD_WRITE | SD_WAIT_PRE)
 #define CMD52           (52 | SDIO_CMD_RESP_R5 | SDIO_CMD_CRC)
 #define CMD53           (53 | SDIO_CMD_RESP_R5 | SDIO_CMD_DATA | SDIO_CMD_CRC)
 #define CMD55			(55 | (1UL << 6))
@@ -133,6 +137,8 @@ enum SDIO_EVENT
 #define SDIO_CLK_LOWSPEED           400000        /* Low-Speed Clock	*/
 
 uint32 wait_for_sdio_irq(LPC_SDMMC_T *pSDMMC);
+
+uint32 wait_for_read_irq(LPC_SDMMC_T *pSDMMC);
 
 /**
  * @brief	Initialize the SDIO card

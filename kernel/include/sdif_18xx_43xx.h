@@ -75,7 +75,7 @@ typedef struct {				/*!< SDMMC Structure        */
 	uint32  DEBNCE;		/*!< Debounce Count Register */
 	uint32  USRID;		/*!< User ID Register       */
 	uint32  VERID;		/*!< Version ID Register    */
-	uint32  RESERVED0;
+	uint32  HCON;
 	uint32  UHS_REG;		/*!< UHS-1 Register         */
 	uint32  RST_N;		/*!< Hardware Reset         */
 	uint32  RESERVED1;

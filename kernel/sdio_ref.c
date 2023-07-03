@@ -249,6 +249,7 @@ int sdref_test(void)
 	uint32 val;
 	uint16 len;
 	uint32 rca;
+	uint16 fifo_depth;
 	// SystemCoreClockUpdate();
 	// Board_Init();
 
@@ -291,6 +292,22 @@ int sdref_test(void)
 	// }
 	SD_Card_SetBlockSize(LPC_SDMMC, 512, rca);
 
+	LPC_SDMMC->TMOUT = 0xffffff64;	//response time out = 0x64, ignore data time out
+
+	// LPC_SDMMC->DEBNCE = 	//ignore
+
+	printf("FIFOTH: %p\n", LPC_SDMMC->FIFOTH);
+	
+	uint32 fifoth_t = LPC_SDMMC->FIFOTH;
+
+	fifo_depth = ((fifoth_t & 0x0fff0000) >> 16) + 1;
+
+	LPC_SDMMC->FIFOTH = ((fifoth_t & 0xf0000000) | ((fifo_depth / 2 - 1) << 16) | (fifo_depth / 2));
+
+	printf("FIFOTH: %p\n", LPC_SDMMC->FIFOTH);
+
+	printf("HCON: %p\n", LPC_SDMMC->HCON);
+
 	/* Enable the SDIO Card Interrupt */
 	// if (!SDIO_Card_EnableInt(LPC_SDMMC, 1)) {
 	// 	printf("DBG: Enabled interrupt for function 1\r\n");
@@ -298,41 +315,85 @@ int sdref_test(void)
 	
 	printf("Card interface enabled use AT commands!\r\n");
 
-	while (1) {
+	// while (1) {
 
-		// len = UART_ReadLn((char *)dat, sizeof(dat));
-		len = 10;
-		for (int i = 0; i < len; i++)
-		{
-			dat[i] = i + '0';
-		}
+	// 	// len = UART_ReadLn((char *)dat, sizeof(dat));
+	// 	len = 10;
+	// 	for (int i = 0; i < len; i++)
+	// 	{
+	// 		dat[i] = i + '0';
+	// 	}
 		
-		if (len > 0) {
-			ret = SDIO_Card_WriteData(LPC_SDMMC, 1, 0x00, &dat[0], len, SDIO_MODE_BUFFER);
-			printf("arrive 5\n");
-			if (ret) /* Error writing data */
-				printf("DBG: Unable to write to SDIO card\r\n");
-			continue; /* Continue and wait for interrupt or data from UART */
+	// 	if (len > 0) {
+	// 		ret = SDIO_Card_WriteData(LPC_SDMMC, 1, 0x00, &dat[0], len, SDIO_MODE_BUFFER);
+	// 		printf("arrive 5\n");
+	// 		if (ret) /* Error writing data */
+	// 			printf("DBG: Unable to write to SDIO card\r\n");
+	// 		continue; /* Continue and wait for interrupt or data from UART */
+	// 	}
+
+	// 	/* Clear the interrupt */
+	// 	ret = SDIO_Read_Direct(LPC_SDMMC, 1, 0x04, &val);
+	// 	printf("arrive 6\n");
+	// 	if (ret)
+	// 		printf("DBG: Error clearing interrupt 0x%X\r\n", ret);
+
+	// 	ret = GainSpan_GetLen(&len);
+	// 	printf("arrive 7\n");
+	// 	if (ret) /* Error getting length */
+	// 		continue;
+
+	// 	ret = SDIO_Card_ReadData(LPC_SDMMC, 1, &dat[0], 0x00, len, SDIO_MODE_BUFFER);
+	// 	printf("arrive 8\n");
+	// 	if (!ret) {
+	// 		dat[len] = 0;
+	// 		printf("%s", dat);
+	// 	} else {
+	// 		printf("DBG: SDIO Card RD error: 0x%X, %d\r\n", ret, ret);
+	// 	}
+	// }
+
+	LPC_SDMMC->BLKSIZ = 512;
+	LPC_SDMMC->BYTCNT = 512;
+	
+	
+	
+	
+	
+	SDIO_Send_Command(LPC_SDMMC, CMD24, 1);
+	printf("response: %p\n", LPC_SDMMC->RESP0);
+
+	
+	int tt = 1;
+	while (LPC_SDMMC->RINTSTS & 0x10)
+	{
+		*(uint32 *)(LPC_SDMMC_BASE + 0x200) = tt;
+		tt++;
+		// printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
+		// printf("data %d: %d\n", i, temp_data);
+		for (int j = 0; j < 100000; j++)
+		{
+			/* code */
 		}
-
-		/* Clear the interrupt */
-		ret = SDIO_Read_Direct(LPC_SDMMC, 1, 0x04, &val);
-		printf("arrive 6\n");
-		if (ret)
-			printf("DBG: Error clearing interrupt 0x%X\r\n", ret);
-
-		ret = GainSpan_GetLen(&len);
-		printf("arrive 7\n");
-		if (ret) /* Error getting length */
-			continue;
-
-		ret = SDIO_Card_ReadData(LPC_SDMMC, 1, &dat[0], 0x00, len, SDIO_MODE_BUFFER);
-		printf("arrive 8\n");
-		if (!ret) {
-			dat[len] = 0;
-			printf("%s", dat);
-		} else {
-			printf("DBG: SDIO Card RD error: 0x%X, %d\r\n", ret, ret);
+		SDIO_IRQHandler();
+	}
+	
+	
+	printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
+	LPC_SDMMC->BLKSIZ = 512;
+	LPC_SDMMC->BYTCNT = 512;
+	SDIO_Send_Command(LPC_SDMMC, CMD17, 1);
+	printf("response: %p\n", LPC_SDMMC->RESP0);
+	uint32 temp_data;
+	for (int i = 0; i < 16; i++)
+	{
+		// wait_for_read_irq(LPC_SDMMC);
+		temp_data = *(uint32 *)(LPC_SDMMC_BASE + 0x200);
+		printf("rintst: %p\n", LPC_SDMMC->RINTSTS);
+		printf("data %d: %d\n", i, temp_data);
+		for (int j = 0; j < 100000; j++)
+		{
+			/* code */
 		}
 	}
 
