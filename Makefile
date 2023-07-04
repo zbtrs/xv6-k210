@@ -40,9 +40,11 @@ OBJS += \
   $K/fat32.o \
   $K/plic.o \
   $K/console.o \
-  $K/sdif_18xx_43xx.o \
-  $K/sdio_18xx_43xx.o \
-  $K/sdio_ref.o \
+  $K/sd_final.o \
+#   $K/sdif_18xx_43xx.o \
+#   $K/sdio_18xx_43xx.o \
+#   $K/sdio_ref.o \
+  
 
 ifeq ($(platform), qemu)
 OBJS += \

@@ -20,7 +20,8 @@
 #include "include/sdcard.h"
 #include "include/fpioa.h"
 #include "include/dmac.h"
-#include "include/sdio_ref.h"
+// #include "include/sdio_ref.h"
+#include "include/sd_final.h"
 extern void _start(void);
 #endif
 extern void _entry(void);
@@ -48,7 +49,8 @@ main(unsigned long hartid, unsigned long dtb_pa)
     printf("hart %d enter main()...\n", hartid);
     #endif
     
-    sdref_test();
+    // sdref_test();
+    sd_test();
 
     // sd_test();
     // sdInit();
